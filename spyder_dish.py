@@ -139,7 +139,7 @@ def zone1L(unks, Ib, G, Ti, Tamb):
     TL1in = 0.5*(Ti + TL1)
     
     # Convection heat transfer insulator L1    
-    Re = 4*G/(np.pi*Dh*mu(TL1in))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(TL1in)) #4*G/(np.pi*Dh*mu(TL1in))
     Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
@@ -168,7 +168,7 @@ def zone1L(unks, Ib, G, Ti, Tamb):
 
     TL1amb = 0.5*(TL1 + Tamb)
 
-    Re = 4*G/(np.pi*Dh*mu(TL1amb))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(TL1amb)) #4*G/(np.pi*Dh*mu(TL1amb))
     Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)    
     
     if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
@@ -203,7 +203,7 @@ def zone1(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff i-1 (B.1)
     Ti1 = 0.5*(Ti + T1)
     
-    Re = 4*G/(np.pi*Dh*mu(Ti1))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(Ti1)) #4*G/(np.pi*Dh*mu(Ti1))
     Pr = cp(Ti1)*mu(Ti1)/kair(Ti1)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
@@ -217,7 +217,7 @@ def zone1(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff 4-o (B.5)
     T4o = 0.5*(T4 + To)
 
-    Re = 4*G/(np.pi*Dh*mu(T4o))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(T4o)) #4*G/(np.pi*Dh*mu(T4o))
     Pr = cp(T4o)*mu(T4o)/kair(T4o)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)
     
@@ -231,13 +231,12 @@ def zone1(unks, Ib, G, Ti, Tamb):
     # Overall heat transfer
     ew = 1e-3 # inner cylinder wall thickness
     A1 = 2*np.pi*rf*L1
-    kw = 0.5*(kk(Ti) + kk(To)) #stainless steel plate (k = 15 W/m·K) Çengel        
+    kw =kk( 0.5*(Ti + To)) #stainless steel plate (k = 15 W/m·K) Çengel        
     U1 = 1/(1/hi1+ ew/kw + 1/h4o) 
   
     Q11 = G*cpMean(T1,Ti)*(T1 - Ti)
     Q12 = G*cpMean(T4,To)*(T4 - To)    
     Q13 = U1*A1*((To - Ti) - (T4 - Ti))/np.log((To - Ti)/(T4 - Ti))
-   
     
     return Q11, Q12, Q13
 
@@ -260,7 +259,7 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     TL2in = 0.5*(Ti + TL2)
     
     # Convection heat transfer insulator L2    
-    Re = 4*G/(np.pi*Dh*mu(TL2in))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(TL2in)) #4*G/(np.pi*Dh*mu(TL2in))
     Pr = cp(TL2in)*mu(TL2in)/kair(TL2in)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
@@ -270,7 +269,7 @@ def zone2L(unks, Ib, G, Ti, Tamb):
         NuL2in = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
     
     hL2in = NuL2in*kair(TL2in)
-    ki = kk(0.5*(TL2 + Ti)) #stainless steel plate (k = 15 W/m·K) Çengel    
+    ki = kk(0.5*TL2in) #stainless steel plate (k = 15 W/m·K) Çengel    
     
     AiL2cyl = 2*np.pi*ri*L2
     UcylL2 = 1/(1/hL2in + ri*np.log(ro/ri)/ki)
@@ -293,7 +292,7 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     
     TL2amb = 0.5*(TL2 + Tamb)
     Re = 4*G/(2*np.pi*rg*mu(TL2amb))
-    Pr = cp(TL2amb)*mu(TL2amb)/kair(TL2amb)    
+    Pr = cp(TL2amb)*mu(TL2amb)/kair(TL2amb)
     
     if (Re > 5e5 and Re<= 1e7) and (Pr > 0.6):
         NucL2 = 0.037*Re**0.8*Pr**(1/3)
@@ -326,7 +325,7 @@ def zone3B(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff win (B.5)
     Twin = 0.5*(Tw + T3B)
     
-    Re = 4*G/(np.pi*Dh*mu(Twin))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(Twin)) #4*G/(np.pi*Dh*mu(Twin))
     Pr = cp(Twin)*mu(Twin)/kair(Twin)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)
     
@@ -380,7 +379,7 @@ def zone2(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff 1-w (B.2)
     T1w = 0.5*(T1 + Tw)
     
-    Re = 4*G/(np.pi*Dh*mu(T1w))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(T1w)) #4*G/(np.pi*Dh*mu(T1w))
     Pr = cp(T1w)*mu(T1w)/kair(T1w)
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
@@ -444,7 +443,7 @@ def zone3(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff 3gi (B.10)
     T3gi = 0.5*(T3 + Tg)
     
-    Re = 4*G/(2*np.pi*rg*mu(T3gi))
+    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(T3gi)) #4*G/(2*np.pi*rg*mu(T3gi))
     Pr = cp(T3gi)*mu(T3gi)/kair(T3gi)    
     
     if (Re > 5e5 and Re<= 1e7) and (Pr > 0.6):
@@ -557,9 +556,13 @@ def zone4(unks, Ib, G, Ti, Tamb):
     return Q41, Q42, Q43
 
 
-def gg(TT):    
+def gg0(TT):    
     
-    return TT - 300
+    return TT - 290
+
+def gg1(TT):    
+    
+    return 5000 - TT
 
 
 
@@ -613,7 +616,7 @@ def dish(unks, Ib, G, Ti, Tamb):
     
     
     print(eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11)
-
+    print()
 
     res = np.array([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11])
     return np.sqrt(np.sum(res**2))
@@ -626,12 +629,12 @@ def dish(unks, Ib, G, Ti, Tamb):
 unks0 = np.array([1200, 510, 700, 710, 720, 1250, 1000, 1300, 500, 400, 410])
 
 lower_bounds = 0.0*unks0 + 300.0  # Establece límite inferior en 0
-upper_bounds = 0.0*unks0 + 3000.0
+upper_bounds = 0.0*unks0 + 5000.0
 
 # sol = least_squares(dish, unks0, args=(1e3*44, 0.04, 500, 300), bounds=(lower_bounds, upper_bounds))
-cons = ({'type': 'ineq', 'fun': gg})
+cons = ({'type': 'ineq', 'fun': gg0}, {'type': 'ineq', 'fun': gg1})
 sol = minimize(dish, unks0, args=(1e3*44, 0.04, 500, 300), constraints=cons,
-               tol=1e-8, bounds=list(zip(lower_bounds, upper_bounds)))
+               tol=1e-10, bounds=list(zip(lower_bounds, upper_bounds)))
 
 # bounds=list(zip(lower_bounds, upper_bounds)),
 
