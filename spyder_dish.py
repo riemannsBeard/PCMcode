@@ -149,7 +149,7 @@ def zone1L(unks, Ib, G, Ti, Tamb):
         NuL1in = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
     
     hL1in = NuL1in*kair(TL1in)
-    ki = 0.5*(kk(TL1) + kk(Ti)) #staiclaonless steel plate (k = 15 W/m·K) Çengel
+    ki = kk(0.5*(TL1 + Ti)) #stainless steel plate (k = 15 W/m·K) Çengel
     
     AiL1cyl = 2*np.pi*ri*L1
     UcylL1 = 1/(1/hL1in + ri*np.log(ro/ri)/ki)
@@ -157,6 +157,7 @@ def zone1L(unks, Ib, G, Ti, Tamb):
     rpo = 0.01
     rpi = 0.042
     eo = 3e-3
+    
     AiL1flat = np.pi*(ri**2 - rpo**2 - 3*rpi**2)
     UflatL1 = 1/(1/hL1in + eo/ki)
     
@@ -181,9 +182,9 @@ def zone1L(unks, Ib, G, Ti, Tamb):
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
 
     hrL1 = epsL1*sigma*(TL1 + Tamb)*(TL1**2 + Tamb**2)
-    Ao = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
+    Ao1 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
     
-    QL12 = Ao*(hcL1 + hrL1)*(TL1 - Tamb)
+    QL12 = Ao1*(hcL1 + hrL1)*(TL1 - Tamb)
     
     return QL11, QL12
 
@@ -220,7 +221,7 @@ def zone1(unks, Ib, G, Ti, Tamb):
     Pr = cp(T4o)*mu(T4o)/kair(T4o)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)
     
-    if (Re > 3000 and Re<= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         Nu4o = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
         h4o = Nu4o*kair(T4o)/Dh
     else:
@@ -263,13 +264,13 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     Pr = cp(TL2in)*mu(TL2in)/kair(TL2in)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
-    if (Re > 3000 and Re<= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         NuL2in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
     else:
         NuL2in = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
     
     hL2in = NuL2in*kair(TL2in)
-    ki = 0.5*(kk(TL2) + kk(Ti)) #stainless steel plate (k = 15 W/m·K) Çengel    
+    ki = kk(0.5*(TL2 + Ti)) #stainless steel plate (k = 15 W/m·K) Çengel    
     
     AiL2cyl = 2*np.pi*ri*L2
     UcylL2 = 1/(1/hL2in + ri*np.log(ro/ri)/ki)
@@ -282,18 +283,16 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     
     AiL2UL2 = AiL2cyl*UcylL2 + AiL2flat*UflatL2
     
-    QL21 = AiL2UL2*((T2 - TL2) - (T1 - TL2))/np.log((T2 - TL2)/(T1 - TL2))
-    
-    
+        
     epsL2 = 0.8
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
     
     
     hrL2 = epsL2*sigma*(TL2 + Tamb)*(TL2**2 + Tamb**2)
-    Ao = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
+    Ao2 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
     
     TL2amb = 0.5*(TL2 + Tamb)
-    Re = 4*G/(np.pi*rg*mu(TL2amb))
+    Re = 4*G/(2*np.pi*rg*mu(TL2amb))
     Pr = cp(TL2amb)*mu(TL2amb)/kair(TL2amb)    
     
     if (Re > 5e5 and Re<= 1e7) and (Pr > 0.6):
@@ -301,9 +300,11 @@ def zone2L(unks, Ib, G, Ti, Tamb):
         hcL2 = NucL2*kair(TL2amb)/Dh
     elif (Re <= 5e5) and (Pr > 0.6):
         NucL2 = 0.664*Re**0.5*Pr**(1/3)
-        hcL2 = NucL2*kair(TL2amb)/L2    
-    
-    QL22 = Ao*(hcL2 + hrL2)*(TL2 - Tamb)
+        hcL2 = NucL2*kair(TL2amb)/L2
+        
+
+    QL21 = AiL2UL2*((T2 - TL2) - (T1 - TL2))/np.log((T2 - TL2)/(T1 - TL2))    
+    QL22 = Ao2*(hcL2 + hrL2)*(TL2 - Tamb)
     
     return QL21, QL22
 
@@ -329,15 +330,13 @@ def zone3B(unks, Ib, G, Ti, Tamb):
     Pr = cp(Twin)*mu(Twin)/kair(Twin)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)
     
-    if (Re > 3000 and Re<= 5e6) or (Pr > 0.5 and Pr <= 2e3):
+    if (Re > 3000 and Re <= 5e6) or (Pr > 0.5 and Pr <= 2e3):
         Nuwin = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
         hwin = Nuwin*kair(Twin)/Dh
     else:
         Nuwin = 0.664*Re**0.5*Pr**(1/3)
         hwin = Nuwin*kair(Twin)/L2
-    
-    hwin = Nuwin*kair(Twin)/L2
-    
+        
     Q3B1 = hwin*Aw*((Tw - T3) - (Tw - T3B))/np.log((Tw - T3)/(Tw - T3B))
     Q3B2 = G*cpMean(T3B, T3)*(T3B - T3)
     
@@ -445,16 +444,13 @@ def zone3(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff 3gi (B.10)
     T3gi = 0.5*(T3 + Tg)
     
-    Re = 4*G/(np.pi*rg*mu(T3gi))
+    Re = 4*G/(2*np.pi*rg*mu(T3gi))
     Pr = cp(T3gi)*mu(T3gi)/kair(T3gi)    
     
     if (Re > 5e5 and Re<= 1e7) and (Pr > 0.6):
         Nu3i = 0.037*Re**0.8*Pr**(1/3)
-        hgi = Nu3i*kair(T3gi)/Dh
-#     elif (Re <= 5e5) and (Pr > 0.6):
     else:
         Nu3i = 0.664*Re**0.5*Pr**(1/3)
-        hgi = Nu3i*kair(T3gi)/L2
         
     h3gi = Nu3i*kair(T3gi)/rg
 
@@ -463,13 +459,13 @@ def zone3(unks, Ib, G, Ti, Tamb):
     beta = 1/(0.5*(Tg + Tamb))
     g = 9.81
     Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)    
-    Ra = g*beta*(Tg - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta/1.225))**2*Pr
+    Ra = Pr*g*beta*(Tg - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta/1.225))**2
     
     Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**8/27))**2
     
     T3go = 0.5*(T3 + Tg)
     
-    hgo = Nu3o*kair(T3go)/L2    
+    hgo = Nu3o*kair(T3go)/rg
     
     Ffg = 0.2956
     Ffw = 0.7044
@@ -532,9 +528,12 @@ def zone4(unks, Ib, G, Ti, Tamb):
     Fgf = 0.6267
     Fgw = 0.3733
     Fwf = 0.4110
-    Fwg = 0.1027    
+    Fwg = 0.1027
     
-    Redc = 4*G*phi**2
+    
+    Re = 4*G/(2*np.pi*rf*mu(Tf))
+    Redc = Re*dc/(2*rf)/phi
+    
     Nuv = (32.504*phi**0.38 - 109.94*phi**1.38 + \
            166.65*phi**2.38 - 86.95*phi**3.38)*Redc**0.438
     hvf = Nuv*kair(Tf)/rf
@@ -547,7 +546,7 @@ def zone4(unks, Ib, G, Ti, Tamb):
     rhow = 0.2 # reflectivity at visible wave
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
     
-    Q41 = G*cpMean(T4, T3)*(T4 - T3)    
+    Q41 = G*cpMean(T4, T3)*(T4 - T3)
     Q42 = Vf*hvf*((Tf - T3) - (Tf - T4))/np.log((Tf - T3)/(Tf - T4))
     Q43 = taug*Ib*Fgf*(1-rhof) + taug*Ib*Fgw*Fwf*rhow - \
             sigma*(Tf**4 - Tw**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffw) + \
@@ -558,13 +557,9 @@ def zone4(unks, Ib, G, Ti, Tamb):
     return Q41, Q42, Q43
 
 
-def jacobian(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
+def gg(TT):    
     
-    # Calcula gradientes respecto a la primera variable (unks)
-    grad_func = grad(dish)
-    
-    return grad_func(unks, Ib, G, Ti, Tamb)
+    return TT - 300
 
 
 
@@ -623,18 +618,26 @@ def dish(unks, Ib, G, Ti, Tamb):
     res = np.array([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11])
     return np.sqrt(np.sum(res**2))
 
-#################  To,   T1, T2,  T3,  T3B,  T4,   Tw,   Tf,   Tg,  TL1,  TL2
+
+
+
+
+#################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,  Tg,  TL1, TL2
 unks0 = np.array([1200, 510, 700, 710, 720, 1250, 1000, 1300, 500, 400, 410])
 
 lower_bounds = 0.0*unks0 + 300.0  # Establece límite inferior en 0
-upper_bounds = 0.0*unks0 + 2000.0
+upper_bounds = 0.0*unks0 + 3000.0
 
 # sol = least_squares(dish, unks0, args=(1e3*44, 0.04, 500, 300), bounds=(lower_bounds, upper_bounds))
+cons = ({'type': 'ineq', 'fun': gg})
+sol = minimize(dish, unks0, args=(1e3*44, 0.04, 500, 300), constraints=cons,
+               tol=1e-8, bounds=list(zip(lower_bounds, upper_bounds)))
 
-sol = minimize(dish, unks0, args=(1e3*44, 0.04, 500, 300),
-              bounds=list(zip(lower_bounds, upper_bounds)))
+# bounds=list(zip(lower_bounds, upper_bounds)),
+
 
 # sol = fmin_tnc(func=dish, x0=unks0, approx_grad=True, args=(1e3*44, 0.04, 500, 300),
 #                bounds=list(zip(lower_bounds, upper_bounds)))
 
-print(sol)
+print()
+print(sol.x)
