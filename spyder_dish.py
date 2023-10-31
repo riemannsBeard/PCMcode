@@ -91,6 +91,14 @@ def mu(T):
     
     return mu_
 
+def rhoA(T):
+        
+    coeffs = np.array([8.78552, -7.54226e-2, 2.69671e-4, -3.42800e-7])
+    
+    rhoA_ = coeffs[0] + coeffs[1]*T + coeffs[2]*T**2 + coeffs[3]*T**3
+    
+    return rhoA_
+
 
 def cpMean(Th, Tc):
             
@@ -126,7 +134,7 @@ def cpMean(Th, Tc):
 
 
 def zone1L(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
     
     rg = 0.125
     rf = 0.182
@@ -142,11 +150,12 @@ def zone1L(unks, Ib, G, Ti, Tamb):
     TL1in = 0.5*(Ti + TL1)
     
     # Convection heat transfer insulator L1    
-    Re = 4*G/(np.pi*Dh*mu(TL1in)) #4*G/(np.pi*Dh*mu(TL1in))
-    Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)    
-    fp = (0.790*np.log(Re) - 1.64)**(-2)    
+    Re = 4*G/(np.pi*Dh*mu(TL1in))
+    Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)
+    fp = (0.790*np.log(Re) - 1.64)**(-2)
     
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+        # Gnielinski
         NuL1in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
     else:
         NuL1in = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
@@ -170,20 +179,31 @@ def zone1L(unks, Ib, G, Ti, Tamb):
     TL1amb = 0.5*(TL1 + Tamb)
 
     Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(TL1amb)) #4*G/(np.pi*Dh*mu(TL1amb))
-    Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)    
+    Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)
+
+    # if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
+    #     NucL1 = 0.037*Re**0.8*Pr**(1/3)
+    #     hcL1 = NucL1*kair(TL1amb)/Dh
+        
+    # elif (Re <= 5e5) and (Pr > 0.6):
+    #     NucL1 = 0.664*Re**0.5*Pr**(1/3)
+    #     hcL1 = NucL1*kair(TL1amb)/L1
     
-    if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
-        NucL1 = 0.037*Re**0.8*Pr**(1/3)
-        hcL1 = NucL1*kair(TL1amb)/Dh
-    elif (Re <= 5e5) and (Pr > 0.6):
-        NucL1 = 0.664*Re**0.5*Pr**(1/3)
-        hcL1 = NucL1*kair(TL1amb)/L1
 
     epsL1 = 0.8
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
 
     hrL1 = epsL1*sigma*(TL1 + Tamb)*(TL1**2 + Tamb**2)
     Ao1 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
+    
+    # Convection heat transfer coeff horizontal flat plate (Cengel)
+    beta = 1/(0.5*(TL1 + Tamb))
+    g = 9.81
+    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)    
+    Ra = Pr*g*beta*(TL1 - Tamb)*L1**3/(mu(1/beta)/rhoA(0.5*(TL1 + Tamb)))**2
+    
+    NucL1 = 0.27*Ra**(1/4)
+    hcL1 = NucL1*kair(TL1amb)/L1
     
     
     QL11 = AiL1UL1*((T1 - TL1) - (Ti - TL1))/np.log((T1 - TL1)/(Ti - TL1))    
@@ -193,7 +213,7 @@ def zone1L(unks, Ib, G, Ti, Tamb):
 
 
 def zone1(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
     
     rg = 0.125
     rf = 0.182
@@ -209,12 +229,13 @@ def zone1(unks, Ib, G, Ti, Tamb):
     # Convection heat transfer coeff i-1 (B.1)
     Ti1 = 0.5*(Ti + T1)
     
-    Re = 4*G/(np.pi*Dh*mu(Ti1)) #4*G/(np.pi*Dh*mu(Ti1))
+    Re = 4*G/(np.pi*Dh*mu(Ti1))
     Pr = cp(Ti1)*mu(Ti1)/kair(Ti1)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)    
     
     if (Re > 3000 and Re<= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         Nui1 = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
+        
     else:
         Nui1 = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
         
@@ -230,9 +251,11 @@ def zone1(unks, Ib, G, Ti, Tamb):
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         Nu4o = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
         h4o = Nu4o*kair(T4o)/Dh
+        
     else:
         Nu4o = 0.664*Re**0.5*Pr**(1/3)
         h4o = Nu4o*kair(T4o)/L1
+
             
     # Overall heat transfer
     ew = 1e-3 # inner cylinder wall thickness
@@ -248,7 +271,7 @@ def zone1(unks, Ib, G, Ti, Tamb):
 
 
 def zone2L(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
     
     rg = 0.125
 
@@ -274,11 +297,12 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         NuL2in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
+        
     else:
         NuL2in = 7.54 + 0.03*(Dh/L2)*Re*Pr/((Dh/L2)*Re*Pr)
     
     hL2in = NuL2in*kair(TL2in)
-    ki = kk(0.5*TL2in) #stainless steel plate (k = 15 W/m·K) Çengel    
+    ki = kk(0.5*(Ti + TL2)) #stainless steel plate (k = 15 W/m·K) Çengel    
     
     AiL2cyl = 2*np.pi*ri*L2
     UcylL2 = 1/(1/hL2in + ri*np.log(ro/ri)/ki)
@@ -299,15 +323,27 @@ def zone2L(unks, Ib, G, Ti, Tamb):
     Ao2 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
     
     TL2amb = 0.5*(TL2 + Tamb)
+    
+    
     Re = 4*G/(np.pi*Dh*mu(TL2amb))
     Pr = cp(TL2amb)*mu(TL2amb)/kair(TL2amb)
     
-    if (Re > 5e5 and Re  <= 1e7) and (Pr > 0.6):
-        NucL2 = 0.037*Re**0.8*Pr**(1/3)
-        hcL2 = NucL2*kair(TL2amb)/Dh
-    elif (Re <= 5e5) and (Pr > 0.6):
-        NucL2 = 0.664*Re**0.5*Pr**(1/3)
-        hcL2 = NucL2*kair(TL2amb)/L2
+    # if (Re > 5e5 and Re  <= 1e7) and (Pr > 0.6):
+    #     NucL2 = 0.037*Re**0.8*Pr**(1/3)
+    #     hcL2 = NucL2*kair(TL2amb)/Dh
+        
+    # elif (Re <= 5e5) and (Pr > 0.6):
+    #     NucL2 = 0.664*Re**0.5*Pr**(1/3)
+    #     hcL2 = NucL2*kair(TL2amb)/L2
+    
+    # Convection heat transfer coeff horizontal flat plate (Cengel)
+    beta = 1/(0.5*(TL2 + Tamb))
+    g = 9.81
+    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)    
+    Ra = Pr*g*beta*(TL2 - Tamb)*L2**3/(mu(1/beta)/rhoA(1/beta))**2
+    
+    NucL2 = 0.27*Ra**(1/4)
+    hcL2 = NucL2*kair(1/beta)/L2
         
 
     QL21 = AiL2UL2*((T2 - TL2) - (T1 - TL2))/np.log((T2 - TL2)/(T1 - TL2))    
@@ -317,7 +353,7 @@ def zone2L(unks, Ib, G, Ti, Tamb):
 
 
 def zone3B(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
 
     rg = 0.125
     rf = 0.182
@@ -333,9 +369,9 @@ def zone3B(unks, Ib, G, Ti, Tamb):
     Dh = 2*(ri - rf)    
 
     # Convection heat transfer coeff win (B.5)
-    Twin = 0.5*(Tw + T3B)
+    Twin = 0.5*(Tw + T3)
     
-    Re = 4*G/(np.pi*Dh*mu(Twin)) #4*G/(np.pi*2*rf*mu(Twin))
+    Re = 4*G/(np.pi*Dh*mu(Twin))
     Pr = cp(Twin)*mu(Twin)/kair(Twin)    
     fp = (0.790*np.log(Re) - 1.64)**(-2)
     
@@ -354,14 +390,7 @@ def zone3B(unks, Ib, G, Ti, Tamb):
 
 
 def zone2(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
-    
-    Ffg = 0.2956
-    Ffw = 0.7044
-    Fgf = 0.6267
-    Fgw = 0.3733
-    Fwf = 0.4110
-    Fwg = 0.1027
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
     
     rg = 0.125
     rf = 0.182
@@ -374,10 +403,24 @@ def zone2(unks, Ib, G, Ti, Tamb):
     
     Aw = 0.1788
     Af = np.pi*rf**2
-    Ag = np.pi*rg**2    
+    Ag = np.pi*rg**2
     
+    # Ffg = 0.2956
+    # Ffw = 0.7044
+    # Fgf = 0.6267
+    # Fgw = 0.3733
+    # Fwf = 0.4110
+    # Fwg = 0.1027
+    
+    Ffg = 0.3171
+    Ffw = 0.4340
+    Fwg = 0.1340
+    Fgf = Af/Ag*Ffg
+    Fwf = Aw/Af*Ffw
+    Fgw = Aw/Ag*Fwg
+
     epsf = 0.95
-    epsw = 1e-3
+    epsw = 0.8 #1e-3
 
     alphag = 0.013 # Absorptivity at visible wavelengths
     alphagp = 1 # Absorptivity at long wavelengths
@@ -389,24 +432,28 @@ def zone2(unks, Ib, G, Ti, Tamb):
     Dh = 2*(ri - rf)
     
     # Convection heat transfer coeff 1-w (B.2)
-    T2w = 0.5*(T2 + Tw)
+    T1w = 0.5*(T1 + Tw)
     
-    Re = 4*G/(np.pi*Dh*mu(T2w)) #4*G/(np.pi*Dh*mu(T1w))
-    Pr = cp(T2w)*mu(T2w)/kair(T2w)
-    fp = (0.790*np.log(Re) - 1.64)**(-2)    
+    Re = 4*G/(np.pi*Dh*mu(T1w)) #4*G/(np.pi*Dh*mu(T1w))
+    Pr = cp(T1w)*mu(T1w)/kair(T1w)
+    fp = (0.790*np.log(Re) - 1.64)**(-2)
     
-    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
-        Nu2w = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
-        h2w = Nu2w*kair(T2w)/Dh
+        
+    if (Re > 3000 and Re<= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+        Nui2 = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
+        
     else:
-        Nu2w = 0.664*Re**0.5*Pr**(1/3)
-        h2w = Nu2w*kair(T2w)/L2
+        Nui2 = 7.54 + 0.03*(Dh/L2)*Re*Pr/((Dh/L2)*Re*Pr)
+        
+    h2w = Nui2*kair(T1w)/Dh
     
     
     taug = 0.851 # glass transmissivity
     rhof = 0.05 # foam reflectivity at visible wave
     rhow = 0.2 # window reflectivity at visible wave
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
+    
+    Tgi = 0.5*(Tg + T3)
         
     Q21 = G*cpMean(T2, T1)*(T2 - T1)
     Q22 = h2w*Aw*((Tw - T1) - (Tw - T2))/np.log((Tw - T1)/(Tw - T2))
@@ -420,16 +467,16 @@ def zone2(unks, Ib, G, Ti, Tamb):
 
 
 def zone3(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
 
     alphag = 0.013 # Absorptivity at visible wavelengths
     alphagp = 1 # Absorptivity at long wavelengths
     
-    epsgp = 0.88 # Glass emisivity at long wavelengths
-    epsg = 0.04 # Glass emisivity at visible wavelengths
+    epsgp = 0.326 #0.88 # Glass emisivity at long wavelengths
+    epsg = 0.013 #0.04 # Glass emisivity at visible wavelengths
     
     epsf = 0.95
-    epsw = 1e-3
+    epsw = 0.8 #1e-3
     
     rg = 0.125
     rf = 0.182
@@ -439,6 +486,7 @@ def zone3(unks, Ib, G, Ti, Tamb):
     
     L1 = 0.195
     L2 = 0.1079
+    Lg = 0.015
     
     Dh = 2*(ri - rf) 
     
@@ -452,45 +500,54 @@ def zone3(unks, Ib, G, Ti, Tamb):
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)    
     
     # Convection heat transfer coeff 3gi (B.10)
-    T3gi = 0.5*(T3 + Tgi)
+    T3gi = 0.5*(T3 + Tg)
     
-    Re = 4*G/(np.pi*2*rg*mu(T3gi))
+    Re = 4*G/(np.pi*(2*rg)*mu(T3gi))
     Pr = cp(T3gi)*mu(T3gi)/kair(T3gi)    
-    
+     
     if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
         Nu3i = 0.037*Re**0.8*Pr**(1/3)
     else:
         Nu3i = 0.664*Re**0.5*Pr**(1/3)
         
-    h3gi = Nu3i*kair(T3gi)/(2*rg)
+    hgi = Nu3i*kair(T3gi)/rg
 
+    
+    Tgo = 0.5*(Tg + Tamb)
 
     # Convection heat transfer coeff 3go
     beta = 1/(0.5*(Tgo + Tamb))
     g = 9.81
     Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)    
-    Ra = Pr*g*beta*(Tgo - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/0.35)**2
+    Ra = Pr*g*beta*(Tgo - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/rhoA(1/beta))**2
     
     Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
     
-    T3go = 0.5*(T3 + Tgo)
+    hgo = Nu3o*kair(Tgo)/np.sqrt(Ag)
     
-    hgo = Nu3o*kair(T3go)/np.sqrt(Ag)
+    # Ffg = 0.2956
+    # Ffw = 0.7044
+    # Fgf = 0.6267
+    # Fgw = 0.3733
+    # Fwf = 0.4110
+    # Fwg = 0.1027
     
-    Ffg = 0.2956
-    Ffw = 0.7044
-    Fgf = 0.6267
-    Fgw = 0.3733
-    Fwf = 0.4110
-    Fwg = 0.1027
+    Ffg = 0.3171
+    Ffw = 0.4340
+    Fwg = 0.1340
+    Fgf = Af/Ag*Ffg
+    Fwf = Aw/Af*Ffw
+    Fgw = Aw/Ag*Fwg
     
     taug = 0.851 # glass transmissivity
     rhof = 0.05 # foam reflectivity at visible wave
     rhow = 0.20 # reflectivity at visible wave
     sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)
     
+    Tgi = 0.5*(Tg + T3)
+    
     Q31 = G*cpMean(T3, T2)*(T3 - T2)    
-    Q32 = h3gi*Ag*((Tgi - T3) - (Tgi - T2))/np.log((Tgi - T3)/(Tgi - T2)) 
+    Q32 = hgi*Ag*((Tgi - T3) - (Tgi - T2))/np.log((Tgi - T3)/(Tgi - T2)) 
     Q33 = alphag*Ib + taug*Ib*(Fgf*rhof*Ffg + Fgw*Fwg*rhow) + \
             sigma*(Tf**4 - Tgi**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffg) + \
                                    (1-epsgp)/(Ag*epsgp)) + \
@@ -503,16 +560,16 @@ def zone3(unks, Ib, G, Ti, Tamb):
 
 
 def zone4(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
     
     alphag = 0.013 # Absorptivity at visible wavelengths
     alphagp = 1 # Absorptivity at long wavelengths
     
-    epsgp = 0.88 # Glass emisivity at long wavelengths
+    epsgp = 0.013 #0.88 # Glass emisivity at long wavelengths
     epsg = 0.04 # Glass emisivity at visible wavelengths
     
     epsf = 0.95
-    epsw = 1e-3
+    epsw = 0.8 #1e-3
         
     rg = 0.125
     rf = 0.182
@@ -535,15 +592,22 @@ def zone4(unks, Ib, G, Ti, Tamb):
     Af = np.pi*rf**2
     PPI = 75 # Pores Per Inch
     
-    Ffg = 0.2956
-    Ffw = 0.7044
-    Fgf = 0.6267
-    Fgw = 0.3733
-    Fwf = 0.4110
-    Fwg = 0.1027
+    # Ffg = 0.2956
+    # Ffw = 0.7044
+    # Fgf = 0.6267
+    # Fgw = 0.3733
+    # Fwf = 0.4110
+    # Fwg = 0.1027
+    
+    Ffg = 0.3171
+    Ffw = 0.4340
+    Fwg = 0.1340
+    Fgf = Af/Ag*Ffg
+    Fwf = Aw/Af*Ffw
+    Fgw = Aw/Ag*Fwg
     
     
-    Re = 4*G/(np.pi*2*rf*mu(Tf))
+    Re = 4*G/(np.pi*(2*rf)*mu(Tf))
     Redc = G*phi**2/(np.pi*rf*mu(Tf))
     
     Nuv = (32.504*phi**0.38 - 109.94*phi**1.38 + \
@@ -566,8 +630,14 @@ def zone4(unks, Ib, G, Ti, Tamb):
     #         sigma*(Tf**4 - Tg**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffg) + \
     #                                (1-epsg)/(Ag*epsg))
     
+    Tgi = 0.5*(Tg + T3)
+    
+    Asf = 0.2023
+    hsf = 450
+    
     Q41 = G*cpMean(T4, T3)*(T4 - T3)
-    Q42 = Vf*hvf*((Tf - T3) - (Tf - T4))/np.log((Tf - T3)/(Tf - T4))
+    # Q42 = Vf*hvf*((Tf - T3) - (Tf - T4))/np.log((Tf - T3)/(Tf - T4))
+    Q42 = Asf*hsf*(Tf - 0.5*(T3B + T4))
     Q43 = taug*Ib*Fgf*(1-rhof) + taug*Ib*Fgw*Fwf*rhow - \
             sigma*(Tf**4 - Tw**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffw) + \
                                    (1-epsw)/(Aw*epsw)) - \
@@ -586,65 +656,87 @@ def gg1(TT):
     return 5000 - TT
 
 def glass(unks, Ib, G, Ti, Tamb):
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
+    
+    alphag = 0.013 # Absorptivity at visible wavelengths
+    alphagp = 1 # Absorptivity at long wavelengths
+    
+    epsgp = 0.326 #0.88 # Glass emisivity at long wavelengths
+    epsg = 0.013 #0.04 # Glass emisivity at visible wavelengths
+    
+    epsf = 0.95
+    epsw = 0.8 #1e-3
+    
+    rg = 0.125
+    rf = 0.182
+    
+    ri = 0.197
+    ro = 0.2
+    
+    L1 = 0.195
+    L2 = 0.1079
+    Lg = 0.015
+    
+    Dh = 2*(ri - rf) 
+    
+    Ag = np.pi*rg**2
+    Af = np.pi*rf**2
+    Aw = np.pi*(rf**2 - rg**2) + 2*np.pi*rf*L2
+        
+    taug = 0.851 # glass transmissivity
+    rhof = 0.05 # foam reflectivity at visible wave
+    rhow = 0.2 # reflectivity at visible wave
+    sigma = 5.67e-8 # W/(m^2 K^4) (Stephan-Boltzmann constant)    
     
     kg = 1.40
     Lg = 0.015
     alphag = 0.013
     
-    return Tgi - Tgo - 0.5/kg*Ib*alphag*Lg**2
+    Ffg = 0.2956
+    Ffw = 0.7044
+    Fgf = 0.6267
+    Fgw = 0.3733
+    Fwf = 0.4110
+    Fwg = 0.1027
+    
+    
+    q = (alphag*Ib + taug*Ib*(Fgf*rhof*Ffg + Fgw*Fwg*rhow))/(np.pi*rg**2*Lg)
+    
+    c1 = (Tgi - Tgo + q*Lg**2/(2*kg))/Lg
+    c2 = Tgo
+    
+    qgo = -kg*c1
+    qgi = -kg*(-q*Lg/kg + c1)
+    
+    
+    # Convection heat transfer coeff 3go
+    beta = 1/(0.5*(Tgo + Tamb))
+    g = 9.81
+    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)    
+    Ra = Pr*g*beta*(Tgo - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/0.35)**2
+    
+    Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
+    
+    T3go = 0.5*(T3 + Tgo)
+    
+    hgo = Nu3o*kair(T3go)/np.sqrt(Ag)    
+    
+    
+    Q3g1 = qgo + hgo*Ag*(Tgo - Tamb) + epsgp*Ag*sigma*(Tgo**4 - Tamb**4)
+    Q3g2 = qgi + sigma*(Tf**4 - Tgi**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffg) + \
+                                         (1-epsgp)/(Ag*epsgp)) + \
+                    sigma*(Tw**4 - Tgi**4)/((1-epsw)/(Aw*epsw) + 1/(Aw*Fwg) + \
+                                            (1-epsgp)/(Ag*epsgp))
+    
+    return Q3g1, Q3g2
 
 
 def dish(unks, Ib, G, Ti, Tamb):
 
     # Ib, G, Ti, Tamb = args
     
-    To, T1, T2, T3, T3B, T4, Tw, Tf, Tgi, Tgo, TL1, TL2 = unks
+    To, T1, T2, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2 = unks
              
-    # #
-    # # ZONE 1
-    # #    
-    # eq1 = zone1(unks, Ib, G, Ti, Tamb)[0] + zone1L(unks, Ib, G, Ti, Tamb)[0] - \
-    #     zone1(unks, Ib, G, Ti, Tamb)[2]
-        
-    # eq2 = zone1(unks, Ib, G, Ti, Tamb)[0] + zone1L(unks, Ib, G, Ti, Tamb)[1] - \
-    #     zone1(unks, Ib, G, Ti, Tamb)[2]
-        
-    # eq3 = zone1(unks, Ib, G, Ti, Tamb)[1] - zone1(unks, Ib, G, Ti, Tamb)[2]
-    
-
-    # #
-    # # ZONE 2
-    # #
-    # eq4 = zone2(unks, Ib, G, Ti, Tamb)[0] + zone2L(unks, Ib, G, Ti, Tamb)[0] - \
-    #         zone2(unks, Ib, G, Ti, Tamb)[1]
-            
-    # eq5 = zone2(unks, Ib, G, Ti, Tamb)[0] + zone2L(unks, Ib, G, Ti, Tamb)[1] - \
-    #         zone2(unks, Ib, G, Ti, Tamb)[1]
-                
-    # eq6 = zone2(unks, Ib, G, Ti, Tamb)[1] + zone3B(unks, Ib, G, Ti, Tamb)[0] - \
-    #         zone2(unks, Ib, G, Ti, Tamb)[2]
-    
-    # eq7 = zone2(unks, Ib, G, Ti, Tamb)[1] + zone3B(unks, Ib, G, Ti, Tamb)[1] - \
-    #         zone2(unks, Ib, G, Ti, Tamb)[2]
-    
-
-    # #
-    # # ZONE 3
-    # #    
-    # eq8 = zone3(unks, Ib, G, Ti, Tamb)[0] - zone3(unks, Ib, G, Ti, Tamb)[1]
-    
-    # eq9 = zone3(unks, Ib, G, Ti, Tamb)[1] - zone3(unks, Ib, G, Ti, Tamb)[2]
-                              
-                              
-    # #
-    # # ZONE 4
-    # #
-    # eq10 = zone4(unks, Ib, G, Ti, Tamb)[0] - zone4(unks, Ib, G, Ti, Tamb)[1]
-    
-    # eq11 = zone4(unks, Ib, G, Ti, Tamb)[1] - zone4(unks, Ib, G, Ti, Tamb)[2]
-    
-    
     
     #
     # ZONE 1
@@ -662,8 +754,7 @@ def dish(unks, Ib, G, Ti, Tamb):
     #
     eq4 = zone2(unks, Ib, G, Ti, Tamb)[0] + zone2L(unks, Ib, G, Ti, Tamb)[0] - \
             zone2(unks, Ib, G, Ti, Tamb)[1] # Eq2
-            
-            
+                        
     eq5 = zone2L(unks, Ib, G, Ti, Tamb)[0] - zone2L(unks, Ib, G, Ti, Tamb)[1] # Eq8
     
 
@@ -676,6 +767,8 @@ def dish(unks, Ib, G, Ti, Tamb):
     
     eq8 = zone3(unks, Ib, G, Ti, Tamb)[1] - zone3(unks, Ib, G, Ti, Tamb)[2] # Eq9
     
+    # eq8 = glass(unks, Ib, G, Ti, Tamb)[0]
+    
     eq9 = zone2(unks, Ib, G, Ti, Tamb)[1] + zone3B(unks, Ib, G, Ti, Tamb)[1] - \
             zone2(unks, Ib, G, Ti, Tamb)[2] # Eq10
                               
@@ -687,35 +780,37 @@ def dish(unks, Ib, G, Ti, Tamb):
     
     eq11 = zone4(unks, Ib, G, Ti, Tamb)[1] - zone4(unks, Ib, G, Ti, Tamb)[2] # Eq11
     
-    eq12 = glass(unks, Ib, G, Ti, Tamb)
+    # eq12 = glass(unks, Ib, G, Ti, Tamb)[1]
     
     
     
-    print(eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11, eq12)
+    print(eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11)
     print()
 
-    res = np.array([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11,
-                    eq12])
+    res = np.array([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11])
+
     return res
 
 
 
-#################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,  Tgi,  Tgo, TL1, TL2
-unks0 = np.array([1183, 536, 707, 714, 716, 1195, 1043, 1245, 1174, 794.5, 382, 358])
+# #################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,  Tgi,  Tgo, TL1, TL2
+# unks0 = np.array([1183, 536, 707, 714, 716, 1195, 1043, 1245, 1174, 794.5, 382, 358])
+
+#################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,       Tgi,   Tgo,    TL1, TL2
+unks0 = np.array([1183, 536, 600, 714, 716, 1195, 1043, 1245, 0.5*(1174 + 794.5), 382, 358])
 
 lower_bounds = 0.0*unks0 + 300.0  # Establece límite inferior en 0
 upper_bounds = 0.0*unks0 + 5000.0
 
-# sol = least_squares(dish, unks0, args=(1e3*44, 0.04, 500, 300),
-                    # bounds=(lower_bounds, upper_bounds))
 cons = ({'type': 'ineq', 'fun': gg0}, {'type': 'ineq', 'fun': gg1})
-# sol = minimize(dish, unks0, args=(1e3*44, 0.04, 500, 300), constraints=cons,
-#                tol=1e-10, bounds=list(zip(lower_bounds, upper_bounds)))
 
-sol = least_squares(dish, unks0, args=(35.6e3, 0.04, 528.66, 307.3),
+
+sol = least_squares(dish, unks0, args=(33.5e3, 0.04, 528.66, 307.3),
                     bounds=(lower_bounds, upper_bounds))
 
-temps = ('To', 'T1', 'T2', 'T3', 'T3B', 'T4', 'Tw', 'Tf', 'Tgi', 'Tgo', 'TL1', 'TL2')
+# sol = minimize(dish, unks0, args=(33.5e3, 0.04, 528.66, 307.3))
+
+temps = ('To', 'T1', 'T2', 'T3', 'T3B', 'T4', 'Tw', 'Tf', 'Tg', 'TL1', 'TL2')
 
 # bounds=list(zip(lower_bounds, upper_bounds)),
 
