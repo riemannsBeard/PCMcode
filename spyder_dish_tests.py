@@ -348,15 +348,16 @@ def zone3B(unks, *args0):
 
     L1 = 0.195
     L2 = 0.1079
+    Lf = 0.065
 
-    Aw = 0.1788
+    Aw = 2*np.pi*rf*(L2 - Lf)
 
     Dh = 2*(ri - rf)
 
     # Convection heat transfer coeff win (B.5)
-    Twin = 0.5*(Tw + T3)
+    Twin = 0.5*(Tw + T3B)
 
-    Re = 2*G/(np.pi*(ri + rf)*mu(Twin))
+    Re = G/(np.pi*(2*rg)*mu(Twin))
     Pr = cp(Twin)*mu(Twin)/kair(Twin)
     fp = (0.790*np.log(Re) - 1.64)**(-2)
 
@@ -365,7 +366,7 @@ def zone3B(unks, *args0):
         hwin = Nuwin*kair(Twin)/Dh
     else:
         Nuwin = 0.664*Re**0.5*Pr**(1/3)
-        hwin = Nuwin*kair(Twin)/L2
+        hwin = Nuwin*kair(Twin)/(2*rg)
 
     Q3B1 = G*cpMean(T3B, T3)*(T3B - T3)
     Q3B2 = hwin*Aw*((Tw - T3) - (Tw - T3B))/np.log((Tw - T3)/(Tw - T3B))
@@ -385,7 +386,8 @@ def zone2(unks, *args0):
     L1 = 0.195
     L2 = 0.1079
 
-    Aw = 0.1788
+    Aw = 2*np.pi*rf*L1
+    
     Af = np.pi*rf**2
     Ag = np.pi*rg**2
 
@@ -443,8 +445,11 @@ def zone2(unks, *args0):
                                (1-epsw)/(Aw*epsw)) - \
         sigma*(Tw**4 - Tgi**4)/((1-epsw)/(Aw*epsw) + 1/(Aw*Fwg) +
                                 (1-epsg)/(Ag*epsg))
+        
+    Q24 = epsw*Ffw*(epsf*Af*sigma*(Tf**4 - T2**4) +\
+                    rhof*taug*Ib)
 
-    return Q21, Q22, Q23
+    return Q21, Q22, Q23, Q24
 
 
 def zone3(unks, *args0):
@@ -483,7 +488,7 @@ def zone3(unks, *args0):
     # Convection heat transfer coeff 3gi (B.10)
     T3gi = 0.5*(T3 + Tg)
 
-    Re = 2*G/(np.pi*(ri + rf)*mu(T3gi))
+    Re = G/(np.pi*(2*rg)*mu(T3gi))
     Pr = cp(T3gi)*mu(T3gi)/kair(T3gi)
 
     if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
@@ -491,7 +496,7 @@ def zone3(unks, *args0):
     else:
         Nu3i = 0.664*Re**0.5*Pr**(1/3)
 
-    hgi = Nu3i*kair(T3gi)/rg
+    hgi = Nu3i*kair(T3gi)/(2*rg)
 
     Tgo = 0.5*(Tg + Tamb)
 
@@ -730,7 +735,9 @@ def dish(unks, *args0):
     # eq2 = zone2(unks, args0)[0] + zone2L(unks, args0)[0] - \
     #     zone2(unks, args0)[1]  # Eq2
 
-    eq2 = zone2L(unks, Ib, G, Ti, Tamb)[0] - zone2L(unks, Ib, G, Ti, Tamb)[1] # Eq8
+    # eq2 = zone2L(unks, Ib, G, Ti, Tamb)[0] - zone2L(unks, Ib, G, Ti, Tamb)[1] # Eq8
+    eq2 = zone2(unks, Ib, G, Ti, Tamb)[0] - zone2(unks, Ib, G, Ti, Tamb)[2] +\
+        zone3B(unks, Ib, G, Ti, Tamb)[0]
 
     #
     # ZONE 3
@@ -741,7 +748,7 @@ def dish(unks, *args0):
 
     # eq8 = zone3(unks, Ib, G, Ti, Tamb)[1] - zone3(unks, Ib, G, Ti, Tamb)[2] # Eq9
 
-    # eq9 = zone2(unks, Ib, G, Ti, Tamb)[1] + zone3B(unks, Ib, G, Ti, Tamb)[1] - \
+    # eq2 = zone2(unks, Ib, G, Ti, Tamb)[1] + zone3B(unks, Ib, G, Ti, Tamb)[1] - \
     #         zone2(unks, Ib, G, Ti, Tamb)[2] # Eq10
 
     #
@@ -768,7 +775,7 @@ args0 = (Ib, G, Ti, Tamb, To, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2)
 # #################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,  Tgi,  Tgo, TL1, TL2
 # unks0 = np.array([1183, 536, 707, 714, 716, 1195, 1043, 1245, 1174, 794.5, 382, 358])
 
-unks0 = [538, 800]
+unks0 = [538, 1e3]
 
 # lower_bounds = 0.0*unks0 + 300.0  # Establece límite inferior en 0
 # upper_bounds = 0.0*unks0 + 5000.0
