@@ -142,39 +142,42 @@ def zone1L(unks, *args0):
     L1 = 0.195
     L2 = 0.1079
 
+
+    # Internal losses
     Dh = 2*(ri - rf)
 
     TL1in = 0.5*(Ti + TL1)
     
-    # Convection heat transfer coeff horizontal flat plate (Cengel)
-    beta = 1/(0.5*(Ti + TL1))
-    g = 9.81
-    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
-    Ra = Pr*g*beta*(TL1 - Tamb)*L1**3/(mu(1/beta)/rhoA(1/beta))**2
+    Re = 2*G/(np.pi*(ri + rf)*mu(TL1in))
+    Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)
+    fp = (0.790*np.log(Re) - 1.64)**(-2)
 
-    NuL1in = 0.27*Ra**(1/4)
-    hL1in = NuL1in*kair(1/beta)/L1
+    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+        NuL1in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
+        hL1in = NuL1in*kair(TL1in)/Dh
+
+    else:
+        NuL1in = 0.664*Re**0.5*Pr**(1/3)
+        hL1in = NuL1in*kair(TL1in)/L1
     
     ki0 = 0.06 # Aluminum silicate (0.06 W/(m.K))
-    ki = ki0*((T1 + Ti + TL1)/3)
     
     AiL1cyl = 2*np.pi*ri*L1
-    UcylL1 = 1/(1/hL1in + ri*np.log(ro/ri)/ki)
+    UcylL1 = 1/(1/hL1in + ri*np.log(ro/ri)/ki0)
 
     rpo = 0.01
     rpi = 0.042
     eo = 3e-3
 
     AiL1flat = np.pi*(ri**2 - rpo**2 - 3*rpi**2)
-    UflatL1 = 1/(1/hL1in + eo/ki)
-
+    UflatL1 = 1/(1/hL1in + eo/ki0)
+    
     AiL1UL1 = AiL1cyl*UcylL1 + AiL1flat*UflatL1
 
+
+    # Ambient losses
     TL1amb = 0.5*(TL1 + Tamb)
-
-    Re = 4*G/(np.pi*(2*ri + 2*rf)*mu(TL1amb))  # 4*G/(np.pi*Dh*mu(TL1amb))
     Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)
-
 
     # Radiation losses
     epsL1 = 0.8
@@ -182,21 +185,18 @@ def zone1L(unks, *args0):
 
     hrL1 = epsL1*sigma*(TL1 + Tamb)*(TL1**2 + Tamb**2)
     Ao1 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
+       
+    # Convection heat transfer coeff horizontal flat plate (Cengel)
+    beta = 1/(0.5*(Tamb + TL1))
+    g = 9.81
+    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
+    Ra = Pr*g*beta*(1/beta - Tamb)*(L1)**3/(mu(1/beta)/rhoA(1/beta))**2
     
-
-    # Convection heat transfer insulator L1
-    Re = 4*G/(np.pi*Dh*mu(TL1amb))
-    Pr = cp(TL1amb)*mu(TL1in)/kair(TL1amb)
-    fp = (0.790*np.log(Re) - 1.64)**(-2)
-
-    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
-        # Gnielinski
-        NucL1 = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
-    else:
-        NucL1 = 7.54 + 0.03*(Dh/L1)*Re*Pr/((Dh/L1)*Re*Pr)
-
-    hcL1 = NucL1*kair(TL1amb)
+    NucL1 = (0.6 + (0.387*Ra**(1/6))/(1 + (0.559/Pr)**(9/16))**(8/27))**2
+    hcL1 = NucL1*kair(1/beta)/(L1)
     
+    NucL1 = (0.68 + (0.67*Ra**0.25)/(1 + (0.492/Pr)**(9/16))**(4/9))
+
 
     QL11 = AiL1UL1*((T1 - TL1) - (Ti - TL1))/np.log((T1 - TL1)/(Ti - TL1))
     QL12 = Ao1*(hcL1 + hrL1)*(TL1 - Tamb)
@@ -386,7 +386,7 @@ def zone2(unks, *args0):
     L1 = 0.195
     L2 = 0.1079
 
-    Aw = 2*np.pi*rf*L1
+    Aw = 0.1788
     
     Af = np.pi*rf**2
     Ag = np.pi*rg**2
@@ -732,12 +732,12 @@ def dish(unks, *args0):
     #
     # ZONE 2
     #
-    # eq2 = zone2(unks, args0)[0] + zone2L(unks, args0)[0] - \
-    #     zone2(unks, args0)[1]  # Eq2
+    eq2 = zone2(unks, args0)[0] + zone2L(unks, args0)[0] - \
+        zone2(unks, args0)[1]  # Eq2
 
     # eq2 = zone2L(unks, Ib, G, Ti, Tamb)[0] - zone2L(unks, Ib, G, Ti, Tamb)[1] # Eq8
-    eq2 = zone2(unks, Ib, G, Ti, Tamb)[0] - zone2(unks, Ib, G, Ti, Tamb)[2] +\
-        zone3B(unks, Ib, G, Ti, Tamb)[0]
+    # eq2 = zone2(unks, Ib, G, Ti, Tamb)[0] - zone2(unks, Ib, G, Ti, Tamb)[2] +\
+    #     zone3B(unks, Ib, G, Ti, Tamb)[0]
 
     #
     # ZONE 3
@@ -775,7 +775,7 @@ args0 = (Ib, G, Ti, Tamb, To, T3, T3B, T4, Tw, Tf, Tg, TL1, TL2)
 # #################  To,  T1,  T2,  T3,  T3B,  T4,   Tw,   Tf,  Tgi,  Tgo, TL1, TL2
 # unks0 = np.array([1183, 536, 707, 714, 716, 1195, 1043, 1245, 1174, 794.5, 382, 358])
 
-unks0 = [538, 1e3]
+unks0 = [538, 710]
 
 # lower_bounds = 0.0*unks0 + 300.0  # Establece límite inferior en 0
 # upper_bounds = 0.0*unks0 + 5000.0
