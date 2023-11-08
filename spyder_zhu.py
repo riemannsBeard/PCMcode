@@ -130,78 +130,78 @@ def cpMean(Th, Tc):
     return cpMean_
 
 
-def zone1L(unks, *args0):
-    T1, T2, T3, T4, Tf, Tw, Tg, To = unks
+# def zone1L(unks, *args0):
+#     T1, T2, T3, T4, Tf, Tw, Tg, To = unks
 
-    rg = 0.125
-    rf = 0.182
+#     rg = 0.125
+#     rf = 0.182
 
-    ri = 0.197
-    ro = 0.2
+#     ri = 0.197
+#     ro = 0.2
 
-    L1 = 0.195
-    L2 = 0.1079
+#     L1 = 0.195
+#     L2 = 0.1079
 
 
-    # Internal losses
-    Dh = 2*(ri - rf)
+#     # Internal losses
+#     Dh = 2*(ri - rf)
 
-    TL1in = 0.5*(Ti + TL1)
+#     TL1in = 0.5*(Ti + TL1)
     
-    Re = 2*G/(np.pi*(ri + rf)*mu(TL1in))
-    Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)
-    fp = (0.790*np.log(Re) - 1.64)**(-2)
+#     Re = 2*G/(np.pi*(ri + rf)*mu(TL1in))
+#     Pr = cp(TL1in)*mu(TL1in)/kair(TL1in)
+#     fp = (0.790*np.log(Re) - 1.64)**(-2)
 
-    if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
-        NuL1in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
-        hL1in = NuL1in*kair(TL1in)/Dh
+#     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
+#         NuL1in = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))
+#         hL1in = NuL1in*kair(TL1in)/Dh
 
-    else:
-        NuL1in = 0.664*Re**0.5*Pr**(1/3)
-        hL1in = NuL1in*kair(TL1in)/L1
+#     else:
+#         NuL1in = 0.664*Re**0.5*Pr**(1/3)
+#         hL1in = NuL1in*kair(TL1in)/L1
     
-    ki0 = 0.06 # Aluminum silicate (0.06 W/(m.K))
+#     ki0 = 0.06 # Aluminum silicate (0.06 W/(m.K))
     
-    AiL1cyl = 2*np.pi*ri*L1
-    UcylL1 = 1/(1/hL1in + ri*np.log(ro/ri)/ki0)
+#     AiL1cyl = 2*np.pi*ri*L1
+#     UcylL1 = 1/(1/hL1in + ri*np.log(ro/ri)/ki0)
 
-    rpo = 0.01
-    rpi = 0.042
-    eo = 3e-3
+#     rpo = 0.01
+#     rpi = 0.042
+#     eo = 3e-3
 
-    AiL1flat = np.pi*(ri**2 - rpo**2 - 3*rpi**2)
-    UflatL1 = 1/(1/hL1in + eo/ki0)
+#     AiL1flat = np.pi*(ri**2 - rpo**2 - 3*rpi**2)
+#     UflatL1 = 1/(1/hL1in + eo/ki0)
     
-    AiL1UL1 = AiL1cyl*UcylL1 + AiL1flat*UflatL1
+#     AiL1UL1 = AiL1cyl*UcylL1 + AiL1flat*UflatL1
 
 
-    # Ambient losses
-    TL1amb = 0.5*(TL1 + Tamb)
-    Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)
+#     # Ambient losses
+#     TL1amb = 0.5*(TL1 + Tamb)
+#     Pr = cp(TL1amb)*mu(TL1amb)/kair(TL1amb)
 
-    # Radiation losses
-    epsL1 = 0.8
-    sigma = 5.67e-8  # W/(m^2 K^4) (Stephan-Boltzmann constant)
+#     # Radiation losses
+#     epsL1 = 0.8
+#     sigma = 5.67e-8  # W/(m^2 K^4) (Stephan-Boltzmann constant)
 
-    hrL1 = epsL1*sigma*(TL1 + Tamb)*(TL1**2 + Tamb**2)
-    Ao1 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
+#     hrL1 = epsL1*sigma*(TL1 + Tamb)*(TL1**2 + Tamb**2)
+#     Ao1 = 2*np.pi*ro*L1 + np.pi*(ro**2 - rpo**2 - 3*rpi**2)
        
-    # Convection heat transfer coeff horizontal flat plate (Cengel)
-    beta = 1/(0.5*(Tamb + TL1))
-    g = 9.81
-    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
-    Ra = Pr*g*beta*(1/beta - Tamb)*(L1)**3/(mu(1/beta)/rhoA(1/beta))**2
+#     # Convection heat transfer coeff horizontal flat plate (Cengel)
+#     beta = 1/(0.5*(Tamb + TL1))
+#     g = 9.81
+#     Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
+#     Ra = Pr*g*beta*(1/beta - Tamb)*(L1)**3/(mu(1/beta)/rhoA(1/beta))**2
     
-    NucL1 = (0.6 + (0.387*Ra**(1/6))/(1 + (0.559/Pr)**(9/16))**(8/27))**2
-    hcL1 = NucL1*kair(1/beta)/(L1)
+#     NucL1 = (0.6 + (0.387*Ra**(1/6))/(1 + (0.559/Pr)**(9/16))**(8/27))**2
+#     hcL1 = NucL1*kair(1/beta)/(L1)
     
-    NucL1 = (0.68 + (0.67*Ra**0.25)/(1 + (0.492/Pr)**(9/16))**(4/9))
+#     NucL1 = (0.68 + (0.67*Ra**0.25)/(1 + (0.492/Pr)**(9/16))**(4/9))
 
 
-    QL11 = AiL1UL1*((T1 - TL1) - (Ti - TL1))/np.log((T1 - TL1)/(Ti - TL1))
-    QL12 = Ao1*(hcL1 + hrL1)*(TL1 - Tamb)
+#     QL11 = AiL1UL1*((T1 - TL1) - (Ti - TL1))/np.log((T1 - TL1)/(Ti - TL1))
+#     QL12 = Ao1*(hcL1 + hrL1)*(TL1 - Tamb)
 
-    return QL11, QL12
+#     return QL11, QL12
 
 
 def zone1(unks, *args0):
@@ -239,7 +239,7 @@ def zone1(unks, *args0):
     # Convection heat transfer coeff 4-o (B.5)
     T4o = 0.5*(T4 + To)
     
-    Re = 2*G/(np.pi*(ri + rf)*mu(T4o))  # 4*G/(np.pi*Dh*mu(Ti1))
+    Re = 4*G/(2*np.pi*rf*mu(T4o))
     Pr = cp(T4o)*mu(T4o)/kair(T4o)
     fp = (1.8*np.log10(Re) - 1.5)**(-2)
     
@@ -496,7 +496,9 @@ def zone3(unks, *args0):
     # Convection heat transfer coeff 3gi (B.10)
     Tgi = 0.5*(T3 + Tg)
 
-    Re = 4*G*L2/(np.pi*rg**2*mu(Tgi))
+    # Re = 4*G*L2/(np.pi*rg**2*mu(Tgi))
+    Re = 4*G*rg/(np.pi*rg**2*mu(Tgi))
+
     Pr = cp(Tgi)*mu(Tgi)/kair(Tgi)
 
     if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
@@ -504,7 +506,7 @@ def zone3(unks, *args0):
     else:
         Nu3i = 0.664*Re**0.5*Pr**(1/3)
 
-    hgi = Nu3i*kair(Tgi)/L2
+    hgi = Nu3i*kair(Tgi)/rg #L2
 
     Tgo = 0.5*(Tg + Tamb)
 
@@ -515,7 +517,7 @@ def zone3(unks, *args0):
     Ra = Pr*g*beta*(Tgo - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/rhoA(1/beta))**2
 
     # Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
-    Nu3o = 0.27*Ra**0.25 # Cengel - horizontal plate
+    Nu3o = 0.59*Ra**0.25 #0.27*Ra**0.25 # Cengel - horizontal plate
     hgo = Nu3o*kair(Tgo)/np.sqrt(Ag)
 
     # Ffg = 0.2956
@@ -856,7 +858,7 @@ def dish(unks, *args0):
 
 
 # Ib, G, Ti, Tamb = 28e3, 0.044, 317, 307.3
-Ib, G, Ti, Tamb = 27e3, 0.043, 342.0, 300.0
+Ib, G, Ti, Tamb = 27e3, 0.043, 334.0, 300.0
 args0 = (Ib, G, Ti, Tamb)
     
 # To, T3, T4, Tw, Tf, Tg, TL1, TL2 = 1183.0, 716.0, 1195.0, 1043.0, 1245.0,\
@@ -896,7 +898,7 @@ print(sol.x)
 T1, T2, T3, T4, Tf, Tw, Tg, To = sol.x
 
 print()
-print(list(zip(temps, [Ti -273, sol.x - 273])))
+print(list(zip(temps, [Ti - 273, sol.x - 273])))
 
 
 # Qlglass, QlglassR, Qlfe, Qlfr, Qlwall, Qlconv
