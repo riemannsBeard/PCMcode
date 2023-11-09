@@ -108,6 +108,7 @@ def cpMean(Th, Tc):
 
 
 def zone1(unks, *args0):
+    Ib, G, Ti, Tamb = args0[0]
     T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To = unks
 
     rg = 0.125
@@ -180,6 +181,7 @@ def zone1(unks, *args0):
 
 
 def zone2(unks, *args0):
+    Ib, G, Ti, Tamb = args0[0]
     T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To = unks
 
     rg = 0.125
@@ -264,6 +266,7 @@ def zone2(unks, *args0):
 
 
 def zone3(unks, *args0):
+    Ib, G, Ti, Tamb = args0[0]
     T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To = unks
 
     alphag = 0.013  # Absorptivity at visible wavelengths
@@ -359,6 +362,7 @@ def zone3(unks, *args0):
 
 
 def zone4(unks, *args0):
+    Ib, G, Ti, Tamb = args0[0]
     T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To = unks
 
     alphag = 0.013  # Absorptivity at visible wavelengths
@@ -550,7 +554,6 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To):
 
 
 def dish(unks, *args0):
-
     T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To = unks
 
     #
@@ -569,15 +572,15 @@ def dish(unks, *args0):
     # # ZONE 3
     # #
     # # 
-    eq5 = zone3(unks, Ib, G, Ti, Tamb)[0] - zone3(unks, Ib, G, Ti, Tamb)[1] # Eq3
-    eq6 = zone3(unks, Ib, G, Ti, Tamb)[3]
-    eq7 = zone3(unks, Ib, G, Ti, Tamb)[0] - zone3(unks, Ib, G, Ti, Tamb)[4]
+    eq5 = zone3(unks, args0)[0] - zone3(unks, args0)[1] # Eq3
+    eq6 = zone3(unks, args0)[3]
+    eq7 = zone3(unks, args0)[0] - zone3(unks, args0)[4]
 
     # #
     # # ZONE 4
     # #
-    eq8 = zone4(unks, Ib, G, Ti, Tamb)[0] - zone4(unks, Ib, G, Ti, Tamb)[1] # Eq5
-    eq9 = zone4(unks, Ib, G, Ti, Tamb)[0] - zone4(unks, Ib, G, Ti, Tamb)[2] # Eq5
+    eq8 = zone4(unks, args0)[0] - zone4(unks, args0)[1] # Eq5
+    eq9 = zone4(unks, args0)[0] - zone4(unks, args0)[2] # Eq5
 
 
     res = np.array([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9])
