@@ -258,8 +258,17 @@ def zone1(unks, *args0):
     A1 = 2*np.pi*rf*L1
     kw = 0.5*(kk(Ti1) + kk(T4o))  # stainless steel plate (k = 15 W/m·K) Çengel
     U1 = 1/(1/hi1 + ew/kw + 1/h4o)
+    
+    #
+    # Losses
+    rpi = 0.01
+    rpo = 0.042
+    A1 = 2*np.pi*ri*L1 + np.pi*(ri**2 - rpo**2 - 3*rpi**2)
+    kAl = 0.06
 
-    Q11 = G*cpMean(T1, Ti)*(T1 - Ti)
+    Ql1in = kAl/(ro - ri)*A1*(T1 - Tamb)
+
+    Q11 = G*cpMean(T1, Ti)*(T1 - Ti) + Ql1in
     Q12 = G*cpMean(T4, To)*(T4 - To)
     Q13 = U1*A1*((To - Ti) - (T4 - T1))/np.log((To - Ti)/(T4 - T1))
 
@@ -447,7 +456,19 @@ def zone2(unks, *args0):
 
     Tgi = 0.5*(Tg + T3)
 
-    Q21 = G*cpMean(T2, T1)*(T2 - T1)
+
+    #
+    # Losses
+    #
+    rpi = 0.01
+    rpo = 0.042
+    A2 = 2*np.pi*ri*L2 + np.pi*(ri**2 - rg**2)
+    kAl = 0.06
+
+    Ql2in = kAl/(ro - ri)*A2*(T1 - Tamb)
+
+
+    Q21 = G*cpMean(T2, T1)*(T2 - T1) + Ql2in
     Q22 = hw*Aw*((Tw - T1) - (Tw - T2))/np.log((Tw - T1)/(Tw - T2))
     # Q23 = taug*Ib*Fgf*rhof*Ffw + taug*Ib*Fgw*(1 - rhow*Fwf - rhow*Fwg) + \
     #     sigma*(Tf**4 - Tw**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffw) +
@@ -754,6 +775,8 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tg, To):
 
     ri = 0.197
     ro = 0.2
+    
+
 
     L1 = 0.195
     L2 = 0.1079
@@ -764,7 +787,9 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tg, To):
     Ag = np.pi*rg**2
     Af = np.pi*rf**2
     Aw = np.pi*(rf**2 - rg**2) + 2*np.pi*rf*L2
-    
+ 
+
+ 
     Ffg = 0.3171
     Ffw = 0.4340
     Fwg = 0.1340
@@ -785,7 +810,7 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tg, To):
     Qlwall = Fwg*epsw*Aw*sigma*(Tw**4 - Tamb**4)
     
     
-    
+    # Natural convection losses
     # Convection heat transfer coeff 3gi (B.10)
     Tgi = 0.5*(T3 + Tg)
 
@@ -808,11 +833,31 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tg, To):
 
     # Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
     Nu3o = 0.27*Ra**0.25 # Cengel - horizontal plate
-    hgo = Nu3o*kair(Tgo)/np.sqrt(Ag)    
+    hgo = Nu3o*kair(Tgo)/np.sqrt(Ag)
     
     Qlconv = Ag*hgo*(Tgo - Tamb)
-        
-    losses = np.array([QlglassE, QlglassR, Qlfe, Qlfr, Qlwall, Qlconv])
+    
+    
+    
+    # Conduction losses insulations
+    
+    rpi = 0.01
+    rpo = 0.042
+    
+    A1 = 2*np.pi*ri*L1 + np.pi*(ri**2 - rpo**2 - 3*rpi**2)
+    A2 = 2*np.pi*ri*L2 + np.pi*(ri**2 - rg**2)
+    
+    kAl = 0.06
+
+    Ql1in = kAl/(ro - ri)*A1*(T1 - Tamb)
+    Ql2in = kAl/(ro - ri)*A2*(T1 - Tamb)
+
+    Qlin = Ql1in + Ql2in
+    
+    #
+    #
+    # TOTAL LOSSES
+    losses = np.array([QlglassE, QlglassR, Qlfe, Qlfr, Qlwall, Qlconv, Qlin])
     
     return losses
 
@@ -858,7 +903,7 @@ def dish(unks, *args0):
 
 
 # Ib, G, Ti, Tamb = 28e3, 0.044, 317, 307.3
-Ib, G, Ti, Tamb = 27e3, 0.043, 334.0, 300.0
+Ib, G, Ti, Tamb = 28e3, 0.043, 320, 313.0
 args0 = (Ib, G, Ti, Tamb)
     
 # To, T3, T4, Tw, Tf, Tg, TL1, TL2 = 1183.0, 716.0, 1195.0, 1043.0, 1245.0,\
@@ -907,3 +952,5 @@ eta = (Ib - np.sum(Qloss))/Ib
 
 print()
 print('Eta = ', eta)
+print()
+print('Losses (%) = ', Qloss/Ib*100)
