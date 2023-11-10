@@ -23,10 +23,10 @@ matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
 
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'Times'
-plt.rcParams['legend.fontsize'] = 12
-plt.rcParams['axes.labelsize'] = 16
-plt.rcParams['axes.titlesize'] = 16
-plt.rcParams['figure.titlesize'] = 16
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['axes.titlesize'] = 14
+plt.rcParams['figure.titlesize'] = 14
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
 plt.rcParams['lines.markersize'] = 3
@@ -82,8 +82,10 @@ eta = np.zeros(len(t))
 unks00 = np.array([343.42854746, 363.03218814, 370.13383945, 693.71771782,
        792.54183421, 654.51447981, 628.93153313, 594.0143274, 671.73647441])
 
-i0 = 12
-for i in range(i0, 41):
+# Solar radiation power impining the dish
+ii = np.where(Ib_june >= 10e3)
+i0 = ii[0]
+for i in range(i0[0], i0[-1]):
 
     Ib, G, Ti, Tamb = Ib_june[i], G0, 330, Tamb_june[i]
     args0 = (Ib, G, Ti, Tamb)
@@ -91,7 +93,7 @@ for i in range(i0, 41):
     # T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To
     # unks0 = np.array([77.0, 91.0, 97.0, 496.0, 300.5, 257.0, 400.0, 233.0, 450.0]) + 273
     
-    if i == i0:
+    if i == i0[0]:
         unks0 = unks00
     else:
         unks0 = np.array([T1[i-1], T2[i-1], T3[i-1], T4[i-1], Tf[i-1], Tw[i-1],
@@ -123,16 +125,19 @@ for i in range(i0, 41):
 
 #%% PRINTS
 fig, ax1 = plt.subplots()
-ax1.plot(t, (Tamb_june - 273), t, To/10, t, Ib_june/1e3, 'k--')
-plt.legend([r'$T_a$ ($^\circ$C)', r'$T_o/10$ ($^\circ$C)',
-            r'$Ib$ (kW)'], loc='upper left')
+ax1.plot(t, (Tamb_june - 273), t, To/10, t, Tf/10, t, Ib_june/1e3, 'k--')
+plt.legend([r'$T_a$ ($^\circ$C)',  r'$T_o/10$ ($^\circ$C)', r'$T_f/10$ ($^\circ$C)',
+            r'$I_b$ (kW)'], loc='upper left')
 ax1.set_xlabel(r'$t$ (h)')
+ax1.set_ylim([-5, 105])
+
 
 ax2 = ax1.twinx()
-color = 'tab:green'
+color = 'tab:purple'
 ax2.plot(t, eta*100, color=color)
 ax2.set_ylabel(r'$\eta$ (\%)', color=color)  # we already handled the x-label with ax1
 ax2.tick_params(axis='y', labelcolor=color)
+ax2.set_ylim([-5, 105])
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 plt.show()
