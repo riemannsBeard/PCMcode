@@ -41,7 +41,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 44
+L = 1
 eps = 0.22
 dx = 2.2e-2
 xf = L
@@ -51,7 +51,7 @@ dx = x[1] - x[0]
 Nx = len(x) - 1
 
 tf = 24*3600
-dt = 3.6
+dt = 0.36 #3.6
 t = np.arange(0, tf + dt, dt)/3600
 Nt = len(t)
 
@@ -87,7 +87,7 @@ beta = eps*kair(T00)
 gamma = (1-eps)*rhos*cpG(T00)
 betas = ks*(1 - eps)
 
-u = mDot/(rhof*eps*np.pi*L)
+u = mDot/(rhof*eps*np.pi*L**2)
 
 Rep = rhof*d*u/mu(T00)
 Pr = cp(T00)*mu(T00)/kair(T00)
@@ -130,14 +130,14 @@ As = sp.sparse.csr_matrix(As)
 
 for i in range(1,len(t)):
     
-    # ODE solution -- THERMAL BUFFER
+    # ODE solution -- ANTORA
        
     
     # --------------------------------------------------------------------------------------------------- #
     # --------------------------------------------------------------------------------------------------- #
     # --------------------------------------------------------------------------------------------------- #
     
-    # Thermocline TANK -- fluid properties changing with temperature
+    # ANTORA TANK -- fluid properties changing with temperature
     
     # Air density at 5 bar
     rhof = 5*101325/(287*T00)
@@ -163,14 +163,16 @@ for i in range(1,len(t)):
     rs = dt*h/gamma
     qs = 2*betas*0.5*dt/(gamma*dx**2)
     
-    diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q), np.ones(Nx)*(-p-q)]
+    diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
+                 np.ones(Nx)*(-p-q)]
     offsets = [0, 1, -1]
     A.setdiag(diagonals[0], offsets[0])
     A.setdiag(diagonals[1], offsets[1])
     A.setdiag(diagonals[2], offsets[2])
     A[-1,-2] = -2*q - p
     
-    diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs), np.ones(Nx + 1)*(-qs)]
+    diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
+                 np.ones(Nx + 1)*(-qs)]
     offsets = [0, 1, -1]
     As.setdiag(diagonals[0], offsets[0])
     As.setdiag(diagonals[1], offsets[1])
@@ -199,17 +201,46 @@ for i in range(1,len(t)):
 
 fig, ax = plt.subplots()
 
-cs1 = ax.contourf(x, t, Tf - 273)
+cs1 = ax.contourf(x, t, Tf-273, 32, extend='both')
 plt.tight_layout()
 cbar1 = plt.colorbar(cs1)
 cbar1.set_label(r'$T_f$ ($^\circ C$)', fontsize=16)
 ax.set_ylabel(r'$t$ (h)')
-ax.set_xlabel(r'$H$ (m)')
+ax.set_xlabel(r'$L$ (m)')
 ax.set_box_aspect(1)
 
-plt.show()   
-    
-    
-    
-    
-    
+plt.show()
+
+
+#%% PLOTS
+fig, ax = plt.subplots()
+
+plt.plot(t, Tf[:,int(len(x)/4)]-273, t, Tf[:,int(len(x)/2)]-273,
+         t, Tf[:,int(3*len(x)/4)]-273, t, Tf[:,-1]-273)
+plt.ylabel(r'$T_f$ ($^\circ C$)')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
+
+plt.show()
+
+
+#%% PLOTS
+fig, ax = plt.subplots()
+
+plt.plot(x, Tf[int(len(x)/6),:]-273, x, Tf[int(2*len(x)/6),:]-273,
+         x, Tf[int(3*len(x)/6),:]-273, x, Tf[int(4*len(x)/6),:]-273,
+         x, Tf[int(5*len(x)/6),:]-273)
+plt.ylim([780, 810])
+plt.ylabel(r'$T_f$ ($^\circ C$)')
+plt.xlabel(r'$x$ (m)')
+plt.legend([r'$t = 4$ h', r'$t = 8$ h', r'$t = 12$ h', r'$t = 16$ h',
+            r'$t = 20$ h', r'$t = 24$ h'])
+
+plt.show()
+
+
+#%% PLOTS
+ff = 10*np.exp(-0.5*(x - L/2)**2/(0.025**2))
+plt.plot(x, ff)
+
+plt.show()
