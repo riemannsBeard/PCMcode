@@ -260,7 +260,7 @@ def zone2(unks, *args0):
     #     sigma*(Tw**4 - Tgi**4)/((1-epsw)/(Aw*epsw) + 1/(Aw*Fwg) +
     #                             (1-epsg)/(Ag*epsg))
         
-    Q23 = epsw*Ffw*(epsf*Af*sigma*(Tf**4 - T2**4) + rhof*taug*Ib)
+    Q23 = epsw*Ffw*(epsf*Af*sigma*(Tf**4 - Tw**4) + rhof*taug*Ib)
 
     return Q21, Q22, Q23
 
@@ -423,9 +423,9 @@ def zone4(unks, *args0):
     if (Ref >= 0 and Ref < 500):
         Nu4 = 1.04*Ref**0.4*Pr**0.36
         
-    elif (Redc >= 500 and Redc <= 1e3):
+    else:
         Nu4 = 0.71*Ref**0.5*Pr**0.36
-        
+                
     hsf4 = Nu4*kair(Tf4)/df
     
 
@@ -449,9 +449,12 @@ def zone4(unks, *args0):
     Q42 = hsf4*np.pi*rf**2*(Tf - T34)
     Q43 = taug*Ib*Fgf*(1-rhof) + taug*Ib*Fgw*Fwf*rhow - \
         sigma*(Tf**4 - Tw**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffw) +
-                               (1-epsw)/(Aw*epsw)) - \
+                                (1-epsw)/(Aw*epsw)) - \
         sigma*(Tf**4 - Tgi**4)/((1-epsf)/(Af*epsf) + 1/(Af*Ffg) +
                                 (1-epsg)/(Ag*epsg))
+    # Q43 = taug*Ib*Fgf*(1-rhof) + taug*Ib*Fgw*Fwf*rhow - \
+    #     epsf*Af*sigma*(Tf**4 - Tw**4) - \
+    #     epsf*Af*sigma*(Tf**4 - Tgi**4)
 
     return Q41, Q42, Q43
 
