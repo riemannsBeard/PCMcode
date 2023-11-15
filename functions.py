@@ -7,7 +7,7 @@ Created on Thu Nov  9 15:06:15 2023
 
 import numpy as np
 from scipy.interpolate import interp1d
-
+from CoolProp import CoolProp as cpr
 
 
 def cp(T):
@@ -124,9 +124,13 @@ def zone1(unks, *args0):
 
     # Convection heat transfer coeff i-1 (B.1)
     Ti1 = 0.5*(Ti + T1)
+    
+    mu = cpr.PropsSI('V', 'T', Ti1, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', Ti1, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', Ti1, 'P', 5e5, 'Air')
 
-    Re = 2*G/(np.pi*(ri + rf)*mu(Ti1))  # 4*G/(np.pi*Dh*mu(Ti1))
-    Pr = cp(Ti1)*mu(Ti1)/kair(Ti1)
+    Re = 2*G/(np.pi*(ri + rf)*mu)  # 4*G/(np.pi*Dh*mu(Ti1))
+    Pr = cp*mu/kair
     fp = (1.8*np.log10(Re) - 1.5)**(-2)
 
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
@@ -137,25 +141,29 @@ def zone1(unks, *args0):
 
     else:
         Nui1 = 7.54 + 0.03*(Dh/L1)*Re*Pr/(1 + 0.016*((Dh/L1)*Re*Pr)**(2/3))
-        hi1 = Nui1*kair(Ti1)/L1
+        hi1 = Nui1*kair/L1
 
     #
     # Convection heat transfer coeff 4-o (B.5)
     T4o = 0.5*(T4 + To)
     
-    Re = 4*G/(2*np.pi*rf*mu(T4o))
-    Pr = cp(T4o)*mu(T4o)/kair(T4o)
+    mu = cpr.PropsSI('V', 'T', T4o, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', T4o, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', T4o, 'P', 5e5, 'Air')
+    
+    Re = 4*G/(2*np.pi*rf*mu)
+    Pr = cp*mu/kair
     fp = (1.8*np.log10(Re) - 1.5)**(-2)
     
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         ct = (T4/Tw)**0.45
         Nu4o = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))*\
             (1 + (Dh/L1)**(2/3))*ct
-        h4o = Nu4o*kair(T4o)/Dh
+        h4o = Nu4o*kair/Dh
 
     else:
         Nu4o = 0.664*Re**0.5*Pr**(1/3)
-        h4o = Nu4o*kair(T4o)/L1
+        h4o = Nu4o*kair/L1
     
     # Overall heat transfer
     ew = 1e-3  # inner cylinder wall thickness
@@ -220,20 +228,24 @@ def zone2(unks, *args0):
 
     # Convection heat transfer coeff 1-w (B.2)
     T2w = 0.5*(T2 + Tw)
+    
+    mu = cpr.PropsSI('V', 'T', T2w, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', T2w, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', T2w, 'P', 5e5, 'Air')
 
-    Re = 2*G/(np.pi*(ri + rf)*mu(T2w))  # 4*G/(np.pi*Dh*mu(T1w))
-    Pr = cp(T2w)*mu(T2w)/kair(T2w)
+    Re = 2*G/(np.pi*(ri + rf)*mu)  # 4*G/(np.pi*Dh*mu(T1w))
+    Pr = cp*mu/kair
     fp = (0.790*np.log(Re) - 1.64)**(-2)
 
     if (Re > 3000 and Re <= 5e6) and (Pr > 0.5 and Pr <= 2e3):
         ct = (T2/Tw)**0.45
         Nu2 = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))*\
             (1 + (Dh/L2)**(2/3))*ct
-        hw = Nu2*kair(T2w)/L2
+        hw = Nu2*kair/L2
 
     else:
         Nu2 = 7.54 + 0.03*(Dh/L2)*Re*Pr/(1 + 0.016*((Dh/L2)*Re*Pr)**(2/3))
-        hw = Nu2*kair(T2w)/Dh
+        hw = Nu2*kair/Dh
 
     taug = 0.851  # glass transmissivity
     rhof = 0.05  # foam reflectivity at visible wave
@@ -303,28 +315,38 @@ def zone3(unks, *args0):
 
     # Convection heat transfer coeff 3gi (B.10)
     T3gi = 0.5*(T3 + Tgi)
+    
+    mu = cpr.PropsSI('V', 'T', T3gi, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', T3gi, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', T3gi, 'P', 5e5, 'Air')
 
-    Re = 4*G*rg/(np.pi*rg**2*mu(T3gi))
-    Pr = cp(T3gi)*mu(T3gi)/kair(T3gi)
+    Re = 4*G*rg/(np.pi*rg**2*mu)
+    Pr = cp*mu/kair
 
     if (Re > 5e5 and Re <= 1e7) and (Pr > 0.6):
         Nu3i = 0.037*Re**0.8*Pr**(1/3)
     else:
         Nu3i = 0.664*Re**0.5*Pr**(1/3)
 
-    hgi = Nu3i*kair(T3gi)/rg
+    hgi = Nu3i*kair/rg
 
     Tgoa = 0.5*(Tgo + Tamb)
+    
+    mu = cpr.PropsSI('V', 'T', Tgoa, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', Tgoa, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', Tgoa, 'P', 5e5, 'Air')
+    rhoA = cpr.PropsSI('D', 'T', Tgoa, 'P', 5e5, 'Air')
+
 
     # Convection heat transfer coeff 3go
     beta = 1/Tgoa
     g = 9.81
-    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
-    Ra = Pr*g*beta*(Tgoa - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/rhoA(1/beta))**2
+    Pr = cp*mu/kair
+    Ra = Pr*g*beta*(Tgoa - Tamb)*(np.sqrt(Ag))**3/(mu/rhoA)**2
 
     # Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
     Nu3o = 0.59*Ra**0.25 #0.27*Ra**0.25 # Cengel - horizontal plate
-    hgo = Nu3o*kair(Tgoa)/np.sqrt(Ag)
+    hgo = Nu3o*kair/np.sqrt(Ag)
 
     Ffg = 0.3171
     Ffw = 0.4340
@@ -406,18 +428,25 @@ def zone4(unks, *args0):
     Tf4 = 0.5*(Tf + T4)
 
     Dh = 2*rf
-    Re = 4*G/(np.pi*Dh*mu(Tf4))
     PPM =29.53*100
     dp = np.sqrt(4*phi/np.pi)/PPM
     dc = 1.86e-3
     df = dp*1.18*np.sqrt((1-phi)/(3*np.pi))/(1 - np.exp(-(1-phi)/0.04))
     dd = (1 - np.exp(-(1-phi)/0.04))*df
     phi = 0.788
-    Redc = 4*G*dc/(np.pi**Dh**2*mu(Tf4))
-    Ref = 4*G*df/(phi*np.pi**Dh**2*mu(Tf4))
-    Rep = 4*G*dp/(np.pi**Dh**2*mu(Tf4))
+    
+    
+    mu = cpr.PropsSI('V', 'T', Tf4, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', Tf4, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', Tf4, 'P', 5e5, 'Air')
+    rhoA = cpr.PropsSI('D', 'T', Tf4, 'P', 5e5, 'Air')
+    
+    Re = 4*G/(np.pi*Dh*mu)
+    Redc = 4*G*dc/(np.pi**Dh**2*mu)
+    Ref = 4*G*df/(phi*np.pi**Dh**2*mu)
+    Rep = 4*G*dp/(np.pi**Dh**2*mu)
 
-    Pr = cp(Tf4)*mu(Tf)/kair(Tf4)
+    Pr = cp*mu/kair
     
     # Correlaciones de Zukaukas (ver e.g. Cengel)
     if (Ref >= 0 and Ref < 500):
@@ -426,7 +455,7 @@ def zone4(unks, *args0):
     else:
         Nu4 = 0.71*Ref**0.5*Pr**0.36
                 
-    hsf4 = Nu4*kair(Tf4)/df
+    hsf4 = Nu4*kair/df
     
 
     taug = 0.851  # glass transmissivity
@@ -521,14 +550,19 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To):
     #
     Tgoa = 0.5*(Tgo + Tamb)
     
+    mu = cpr.PropsSI('V', 'T', Tgoa, 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', Tgoa, 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', Tgoa, 'P', 5e5, 'Air')
+    rhoA = cpr.PropsSI('D', 'T', Tgoa, 'P', 5e5, 'Air')
+    
     beta = 1/Tgoa
     g = 9.81
-    Pr = cp(1/beta)*mu(1/beta)/kair(1/beta)
-    Ra = Pr*g*beta*(Tgoa - Tamb)*(np.sqrt(Ag))**3/(mu(1/beta)/rhoA(1/beta))**2
+    Pr = cp*mu/kair
+    Ra = Pr*g*beta*(Tgoa - Tamb)*(np.sqrt(Ag))**3/(mu/rhoA)**2
 
     # Nu3o = (0.825 + 0.387*Ra**(1/6)/((1 + (0.492/Pr)**(9/16))**(8/27)))**2
     Nu3o = 0.27*Ra**0.25 # Cengel - horizontal plate
-    hgo = Nu3o*kair(Tgoa)/np.sqrt(Ag)
+    hgo = Nu3o*kair/np.sqrt(Ag)
     
     Qlconv = Ag*hgo*(Tgoa - Tamb)
     
@@ -554,6 +588,12 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To):
     losses = np.array([QlglassE, QlglassR, Qlfe, Qlfr, Qlwall, Qlconv, Qlin])
     
     return losses
+
+
+def eqP2(p2, p1, rho1, T1, T2):
+    rho2 = cpr.PropsSI('D', 'T', T2, 'P', p2, 'Air')  # Densidad 2 usando CoolProp
+    return p1 / (rho1 * T1) - p2 / (rho2 * T2)
+
 
 
 def dish(unks, *args0):

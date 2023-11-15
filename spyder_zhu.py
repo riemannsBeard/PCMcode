@@ -89,6 +89,10 @@ Ti0 = 500 + 273
 unks00 = np.array([Ti0*1.05, Ti0*1.10, Ti0*1.15, Ti0*1.20,
        Ti0*1.25, Ti0*1.5, Ti0*1.07, Ti0*1.03, Ti0*1.27])
 
+# Object with thermophysical properties of ideal air
+# mu = cp.PropsSI('V', 'T', 1273, 'P', 5e5, 'Air')
+
+
 # Solar radiation power impining the dish
 ii = np.where(Ib_june >= 10e3)
 i0 = ii[0]
