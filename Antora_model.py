@@ -140,20 +140,23 @@ for i in range(1,len(t)):
     # ANTORA TANK -- fluid properties changing with temperature
     
     # Air density at 5 bar
-    rhof = 5*101325/(287*T00)
+    rhof = cpr.PropsSI('D', 'T', T00, 'P', 5e3, 'Air')
+    cp = cpr.PropsSI('C', 'T', T00, 'P', 5e3, 'Air')
+    kair = cpr.PropsSI('L', 'T', T00, 'P', 5e5, 'Air')
+    mu = cpr.PropsSI('V', 'T', T00, 'P', 5e5, 'Air')
     
-    alpha = eps*rhof*cp(T00)
-    beta = eps*kair(T00)
+    alpha = eps*rhof*cp
+    beta = eps*kair
     
     gamma = (1-eps)*rhos*cpG(T00)
     betas = ks*(1 - eps)
     
     u = mDot/(rhof*eps*np.pi*L**2)
 
-    Rep = rhof*d*u/mu(T00)
-    Pr = cp(T00)*mu(T00)/kair(T00)
+    Rep = rhof*d*u/mu
+    Pr = cp*mu/kair
     Nu = 0.664*Rep**0.5*Pr**0.5
-    a = Nu*kair(T00)/d
+    a = Nu*kair/d
     h = 6*(1-eps)*beta*(2 + 1.1*Rep**(0.6)*Pr**(1/3))/(d**2)
 
     p = dt*u/dx
@@ -195,6 +198,15 @@ for i in range(1,len(t)):
     
     # theta6[i,k] = Tf[i,-1]/T0
     
+#%% CALCULO CAIDA PRESIÓN
+
+p1 = 5e5
+T1 = 1e3
+T2 = 500
+rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
+
+p2_guess = 2.5e3  # Supongamos un valor inicial para p2
+p2_solution = fsolve(eqP2, p2_guess, args=(p1, rho1, T1, T2))   
     
     
 #%% PLOTS
@@ -227,10 +239,10 @@ plt.show()
 #%% PLOTS
 fig, ax = plt.subplots()
 
-plt.plot(x, Tf[int(len(x)/6),:]-273, x, Tf[int(2*len(x)/6),:]-273,
+ax.plot(x, Tf[int(len(x)/6),:]-273, x, Tf[int(2*len(x)/6),:]-273,
          x, Tf[int(3*len(x)/6),:]-273, x, Tf[int(4*len(x)/6),:]-273,
          x, Tf[int(5*len(x)/6),:]-273)
-plt.ylim([780, 810])
+ax.set_ylim(780, 810)
 plt.ylabel(r'$T_f$ ($^\circ C$)')
 plt.xlabel(r'$x$ (m)')
 plt.legend([r'$t = 4$ h', r'$t = 8$ h', r'$t = 12$ h', r'$t = 16$ h',

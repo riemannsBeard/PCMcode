@@ -34,7 +34,7 @@ plt.rcParams['lines.markersize'] = 3
 #%% VALIDATION
 
 # Ib, G, Ti, Tamb = 28e3, 0.044, 317, 307.3
-Ib, G, Ti, Tamb = 28e3, 0.043, 330, 313.0
+Ib, G, Ti, Tamb = 29e3, 0.043, 329, 313.0
 args0 = (Ib, G, Ti, Tamb)
     
 

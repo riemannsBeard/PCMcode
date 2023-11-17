@@ -9,7 +9,6 @@ import numpy as np
 from scipy.interpolate import interp1d
 from CoolProp import CoolProp as cpr
 
-
 def cp(T):
 
     coeffs = np.array([[1068.53, -0.5252, 1.338e-3, -1.031e-6, 3.208e-10,
@@ -137,7 +136,7 @@ def zone1(unks, *args0):
         ct = (T1/Tw)**0.45
         Nui1 = (fp/8)*(Re - 1e3)*Pr/(1 + 12.7*np.sqrt(fp/8)*(Pr**(2/3) - 1))*\
             (1 + (Dh/L1)**(2/3))*ct
-        hi1 = Nui1*kair(Ti1)/Dh
+        hi1 = Nui1*kair/Dh
 
     else:
         Nui1 = 7.54 + 0.03*(Dh/L1)*Re*Pr/(1 + 0.016*((Dh/L1)*Re*Pr)**(2/3))
@@ -233,7 +232,7 @@ def zone2(unks, *args0):
     kair = cpr.PropsSI('L', 'T', T2w, 'P', 5e5, 'Air')
     cp = cpr.PropsSI('C', 'T', T2w, 'P', 5e5, 'Air')
 
-    Re = 2*G/(np.pi*(ri + rf)*mu)  # 4*G/(np.pi*Dh*mu(T1w))
+    Re = 2*G/(np.pi*(ri + rf)*mu)  # 4*G/(np.pi*Dh*mu)
     Pr = cp*mu/kair
     fp = (0.790*np.log(Re) - 1.64)**(-2)
 
@@ -588,12 +587,30 @@ def Qlosses(Ib, Tamb, T1, T2, T3, T4, Tf, Tw, Tgi, Tgo, To):
     losses = np.array([QlglassE, QlglassR, Qlfe, Qlfr, Qlwall, Qlconv, Qlin])
     
     return losses
+    
+    # return p2 - p1*rho2*T2/(rho1*T1)
 
 
-def eqP2(p2, p1, rho1, T1, T2):
-    rho2 = cpr.PropsSI('D', 'T', T2, 'P', p2, 'Air')  # Densidad 2 usando CoolProp
-    return p1 / (rho1 * T1) - p2 / (rho2 * T2)
 
+def pDrop(p1, T1, T2, G, D):
+    
+    rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
+    v1 = 4*G/(rho1*np.pi*D**2)
+    R = 286
+
+    rho2 = (p1 + rho1*v1**2 +\
+            np.sqrt((p1 + rho1*v1**2)**2 - 4*R*T2*(rho1*v1)**2))/(2*R*T2)
+        
+    v2 = (p1 + rho1*v1**2 -\
+            np.sqrt((p1 + rho1*v1**2)**2 - 4*R*T2*(rho1*v1)**2))/(2*rho1*v1)
+        
+    p2 = cpr.PropsSI('P', 'T', T2, 'D', rho2, 'Air')
+    T2 = cpr.PropsSI('T', 'P', p2, 'D', rho2, 'Air')
+    
+    kp = (p1 + rho1*v1**2 +\
+            np.sqrt((p1 + rho1*v1**2)**2 - 4*286*T2*(rho1*v1)**2))/2
+    
+    return p2, rho2, v2, T2
 
 
 def dish(unks, *args0):
