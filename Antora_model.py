@@ -17,7 +17,7 @@ from functions import *
 
 
 warnings.filterwarnings('ignore')
-matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
+# matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
 
 #%% DEFAULTS
 
@@ -38,10 +38,9 @@ def cpG(T):
     return 4184*(0.54 + 9.11e-6*T - 90.27/T - 43449.3/T**2 + 1.593e7/T**3 -\
                  1.437e9/T**4)
 
-
 #%% PROBLEM
 
-L = 1
+L = 6.1
 eps = 0.22
 dx = 2.2e-2
 xf = L
@@ -73,26 +72,30 @@ Tf[:,0] = Tin
 bc1 = np.zeros(Nx)
 
 # ICs
-T00 = 800 + 273
+T00 = 500 + 273
 Tf[0,:] = T00
 Ts[0,:] = T00
 
 
 #%% MATRIX ASSEMBLY
 
-rhof = 5*101325/(287*T00)
+rhof = cpr.PropsSI('D', 'T', T00, 'P', 5e5, 'Air')
+cp = cpr.PropsSI('C', 'T', T00, 'P', 5e5, 'Air')
+kair = cpr.PropsSI('L', 'T', T00, 'P', 5e5, 'Air')
+mu = cpr.PropsSI('V', 'T', T00, 'P', 5e5, 'Air')
 
-alpha = eps*rhof*cp(T00)
-beta = eps*kair(T00)
+alpha = eps*rhof*cp
+beta = eps*kair
 gamma = (1-eps)*rhos*cpG(T00)
 betas = ks*(1 - eps)
 
-u = mDot/(rhof*eps*np.pi*L**2)
+D = 3    
+u = 4*mDot/(rhof*eps*np.pi*D**2)
 
-Rep = rhof*d*u/mu(T00)
-Pr = cp(T00)*mu(T00)/kair(T00)
+Rep = rhof*d*u/mu
+Pr = cp*mu/kair
 Nu = 0.664*Rep**0.5*Pr**0.5
-a = Nu*kair(T00)/d
+a = Nu*kair/d
 #h = 6*(1-eps)*beta*(2 + 1.1*Rep**(0.6)*Pr**(1/3))/(d**2)
 
 h = a*6*(1-eps)/d
@@ -125,6 +128,10 @@ As[0,1] = -2*qs
 As = sp.sparse.csr_matrix(As)
 
 
+# Heat addition in the solid
+Qv = 0*x
+Qv[3::8] = 2.5e-5
+Qv = sp.sparse.diags(Qv, 0).toarray()
 
 #%% SOLUTION
 
@@ -140,18 +147,19 @@ for i in range(1,len(t)):
     # ANTORA TANK -- fluid properties changing with temperature
     
     # Air density at 5 bar
-    rhof = cpr.PropsSI('D', 'T', T00, 'P', 5e3, 'Air')
-    cp = cpr.PropsSI('C', 'T', T00, 'P', 5e3, 'Air')
-    kair = cpr.PropsSI('L', 'T', T00, 'P', 5e5, 'Air')
-    mu = cpr.PropsSI('V', 'T', T00, 'P', 5e5, 'Air')
+    rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+    cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+    kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+    mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
     
     alpha = eps*rhof*cp
     beta = eps*kair
     
     gamma = (1-eps)*rhos*cpG(T00)
     betas = ks*(1 - eps)
-    
-    u = mDot/(rhof*eps*np.pi*L**2)
+
+    D = 3    
+    u = 4*mDot/(rhof*eps*np.pi*D**2)
 
     Rep = rhof*d*u/mu
     Pr = cp*mu/kair
@@ -165,6 +173,7 @@ for i in range(1,len(t)):
 
     rs = dt*h/gamma
     qs = 2*betas*0.5*dt/(gamma*dx**2)
+    
     
     diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
                  np.ones(Nx)*(-p-q)]
@@ -188,7 +197,7 @@ for i in range(1,len(t)):
     bc1[0] = Tin #Tf[i-1,0]
     
 
-    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
+    Ts[i,:] = sp.sparse.linalg.spsolve(As - Qv, Ts[i-1,:] + rs*Tf[i-1,:])
     Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                 r*Ts[i-1,1:])
     
@@ -198,25 +207,39 @@ for i in range(1,len(t)):
     
     # theta6[i,k] = Tf[i,-1]/T0
     
-#%% CALCULO CAIDA PRESIÓN
+#%% CALCULO CAIDA PRESIÓN (despreciable)
 
-p1 = 5e5
-T1 = 1e3
-T2 = 500
-rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
+# p1 = 5e5
+# T1 = 1e3
+# T2 = 500
+# rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
 
-p2_guess = 2.5e3  # Supongamos un valor inicial para p2
-p2_solution = fsolve(eqP2, p2_guess, args=(p1, rho1, T1, T2))   
+# p2_guess = 2.5e3  # Supongamos un valor inicial para p2
+# p2_solution = fsolve(eqP2, p2_guess, args=(p1, rho1, T1, T2))   
     
     
 #%% PLOTS
 
 fig, ax = plt.subplots()
 
-cs1 = ax.contourf(x, t, Tf-273, 32, extend='both')
+cs1 = ax.contourf(x, t, Tf-273, 32)
 plt.tight_layout()
 cbar1 = plt.colorbar(cs1)
 cbar1.set_label(r'$T_f$ ($^\circ C$)', fontsize=16)
+ax.set_ylabel(r'$t$ (h)')
+ax.set_xlabel(r'$L$ (m)')
+ax.set_box_aspect(1)
+
+plt.show()
+
+#%% PLOTS
+
+fig, ax = plt.subplots()
+
+cs1 = ax.contourf(x, t, Ts-273, 32)
+plt.tight_layout()
+cbar1 = plt.colorbar(cs1)
+cbar1.set_label(r'$T_s$ ($^\circ C$)', fontsize=16)
 ax.set_ylabel(r'$t$ (h)')
 ax.set_xlabel(r'$L$ (m)')
 ax.set_box_aspect(1)
@@ -239,20 +262,36 @@ plt.show()
 #%% PLOTS
 fig, ax = plt.subplots()
 
-ax.plot(x, Tf[int(len(x)/6),:]-273, x, Tf[int(2*len(x)/6),:]-273,
-         x, Tf[int(3*len(x)/6),:]-273, x, Tf[int(4*len(x)/6),:]-273,
-         x, Tf[int(5*len(x)/6),:]-273)
-ax.set_ylim(780, 810)
-plt.ylabel(r'$T_f$ ($^\circ C$)')
-plt.xlabel(r'$x$ (m)')
-plt.legend([r'$t = 4$ h', r'$t = 8$ h', r'$t = 12$ h', r'$t = 16$ h',
-            r'$t = 20$ h', r'$t = 24$ h'])
+plt.plot(t, Ts[:,int(len(x)/4)]-273, t, Ts[:,int(len(x)/2)]-273,
+         t, Ts[:,int(3*len(x)/4)]-273, t, Ts[:,-1]-273)
+plt.ylabel(r'$T_s$ ($^\circ C$)')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
 
 plt.show()
 
 
 #%% PLOTS
-ff = 10*np.exp(-0.5*(x - L/2)**2/(0.025**2))
-plt.plot(x, ff)
+# fig, ax = plt.subplots()
 
-plt.show()
+# ax.plot(x, Tf[int(len(x)/6),:]-273, x, Tf[int(2*len(x)/6),:]-273,
+#          x, Tf[int(3*len(x)/6),:]-273, x, Tf[int(4*len(x)/6),:]-273,
+#          x, Tf[int(5*len(x)/6),:]-273)
+# # ax.set_ylim(780, 810)
+# plt.ylabel(r'$T_f$ ($^\circ C$)')
+# plt.xlabel(r'$x$ (m)')
+# plt.legend([r'$t = 4$ h', r'$t = 8$ h', r'$t = 12$ h', r'$t = 16$ h',
+#             r'$t = 20$ h', r'$t = 24$ h'])
+
+# plt.show()
+
+tc = L/u
+
+Lambdas = L/u*h/(rhos*cpG(1000))/(1 - eps)
+Lambdaf = L/u*h/(rhof*cp)/eps
+a = Lambdas*Lambdaf
+b = 0
+Delta = np.sqrt(a**2 - 4*a*b)
+
+solf = T00*np.exp(-x*0/L) + T00 + 0.5*T00*((1 - a/Delta)*np.exp(-0.5*t[:,np.newaxis]/tc*(Delta + a)) +\
+                (1 + a/Delta)*np.exp(0.5*t[:,np.newaxis]/tc*(Delta - a)))

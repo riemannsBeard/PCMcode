@@ -9,11 +9,10 @@ import matplotlib.pyplot as plt
 import math
 import scipy as sp
 import numpy as np
+import pandas as pd
 import csv
 import matplotlib_inline
 import warnings
-
-import pandas as pd
 
 
 from functions import *
@@ -42,7 +41,7 @@ dt = 0.5
 t = np.arange(0, tf + dt, dt)
 G0 = 0.043
 
-# Ambient temperature
+# AMBIENT TEMPERATURE
 Tamb_june = np.loadtxt(r"./CordobaJune/Cordoba_June_Tamb.csv",
                        delimiter=",", dtype=float)
 Tamb_march = np.loadtxt('./CordobaMarch/Cordoba_March_Tamb.csv',
@@ -82,6 +81,111 @@ ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'$I_b$ (kW)')
 
 
+# ELECTRICITY DEMAND (MW)
+dem_march = np.loadtxt('./March_demand.csv',
+                        delimiter=";", dtype=float)
+dem_june = np.loadtxt('./June_demand.csv',
+                        delimiter=";", dtype=float)
+dem_dec = np.loadtxt('./Dec_demand.csv',
+                        delimiter=";", dtype=float)
+
+# Interpolacion
+dem_march = np.interp(t, dem_march[:,0], dem_march[:,1])
+dem_june = np.interp(t, dem_june[:,0], dem_june[:,1])
+dem_dec = np.interp(t, dem_dec[:,0], dem_dec[:,1])
+
+fig, ax1 = plt.subplots()
+plt.plot(t, dem_march, t, dem_june, t, dem_dec)
+plt.title('Energy Demand')
+plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+ax1.set_xlabel(r'$t$ (h)')
+ax1.set_ylabel(r'MW')
+plt.show()
+
+
+
+
+# ELECTRICITY GENERATION (MW)
+cl = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+rwidx = ['Hora', 'Eólica', 'Hidráulica', 'Solar fotovoltaica', 'Solar térmica',
+         'Térmica renovable', 'Cogeneración y residuos']
+nonrwidx = gen_march.columns.difference(rwidx[1:], sort=False)
+
+gen_march = pd.read_csv('./March_gen.csv', delimiter=";", encoding='latin-1')
+gen_rw_march = gen_march[rwidx]
+gen_nonrw_march = gen_march[nonrwidx]
+
+gen_june = pd.read_csv('./June_gen.csv', delimiter=";", encoding='latin-1')
+gen_rw_june = gen_june[rwidx]
+gen_nonrw_june = gen_june[nonrwidx]
+
+gen_dec = pd.read_csv('./Dec_gen.csv', delimiter=";", encoding='latin-1')
+gen_rw_dec = gen_dec[rwidx]
+gen_nonrw_dec = gen_dec[nonrwidx]
+
+
+# Interpolacion
+rw_march_gen = np.interp(t, gen_rw_march.iloc[:,0],
+                         gen_rw_march.iloc[:,1:].sum(axis=1))
+nonrw_march_gen = np.interp(t, gen_nonrw_march.iloc[:,0],
+                         gen_nonrw_march.iloc[:,1:].sum(axis=1))
+
+rw_june_gen = np.interp(t, gen_rw_june.iloc[:,0],
+                         gen_rw_june.iloc[:,1:].sum(axis=1))
+nonrw_june_gen = np.interp(t, gen_nonrw_june.iloc[:,0],
+                         gen_nonrw_june.iloc[:,1:].sum(axis=1))
+
+rw_dec_gen = np.interp(t, gen_rw_dec.iloc[:,0],
+                         gen_rw_dec.iloc[:,1:].sum(axis=1))
+nonrw_dec_gen = np.interp(t, gen_nonrw_dec.iloc[:,0],
+                         gen_nonrw_dec.iloc[:,1:].sum(axis=1))
+
+
+fig, ax1 = plt.subplots()
+plt.title('Renewable (-) vs. Non-Renewable (- -) Energy Generation')
+ax1.plot(t, rw_march_gen, '-', color=cl[0], label='March')
+ax1.plot(t, nonrw_march_gen, '--', color=cl[0])
+ax1.plot(t, rw_june_gen, '-', color=cl[1], label='June')
+ax1.plot(t, nonrw_june_gen, '--', color=cl[1])
+ax1.plot(t, rw_dec_gen, '-', color=cl[2], label='Dec.')
+ax1.plot(t, nonrw_dec_gen, '--', color=cl[2])
+plt.legend()
+ax1.set_xlabel(r'$t$ (h)')
+ax1.set_ylabel(r'MW')
+plt.show()
+
+
+
+
+# ELECTRICITY PRICE (€/MWh)
+pelec_march = np.loadtxt('./March_pelec.csv',
+                        delimiter=";", dtype=float)
+pelec_june = np.loadtxt('./June_pelec.csv',
+                        delimiter=";", dtype=float)
+pelec_dec = np.loadtxt('./Dec_pelec.csv',
+                        delimiter=";", dtype=float)
+
+# Interpolacion
+pelec_june = np.interp(t, pelec_june[:,1], pelec_june[:,0])
+pelec_march = np.interp(t, pelec_march[:,1], pelec_march[:,0])
+pelec_dec = np.interp(t, pelec_dec[:,1], pelec_dec[:,0])
+
+
+fig, ax1 = plt.subplots()
+plt.plot(t, pelec_march, t, pelec_june, t, pelec_dec)
+plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+ax1.set_xlabel(r'$t$ (h)')
+ax1.set_ylabel(r'€/MWh')
+
+
+
+
+
+
+
+
+
 # Ib, G, Ti, Tamb = 28e3, 0.043, 330, 313.0
 
 
@@ -99,7 +203,7 @@ unks00 = np.array([Ti0*1.05, Ti0*1.10, Ti0*1.15, Ti0*1.20,
 # mu = cp.PropsSI('V', 'T', 1273, 'P', 5e5, 'Air')
 
 monthNo = 0, 1, 2
-month = 'march', 'june', 'dec'
+month = 'March', 'June', 'December'
 
 Ibs = np.array([Ib_march, Ib_june, Ib_dec])
 Tambs = np.array([Tamb_march, Tamb_june, Tamb_dec])
