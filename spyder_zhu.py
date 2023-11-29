@@ -61,10 +61,10 @@ ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'$T$ ($^\circ$C)')
 
 # DNI (W/m^2) and Ib (W)
-DNI_june = np.loadtxt('./CordobaJune/Cordoba_June_DNI.csv', delimiter=",",
-                      dtype=float)
 DNI_march = np.loadtxt('./CordobaMarch/Cordoba_March_DNI.csv', delimiter=",",
                        dtype=float)
+DNI_june = np.loadtxt('./CordobaJune/Cordoba_June_DNI.csv', delimiter=",",
+                      dtype=float)
 DNI_dec = np.loadtxt('./CordobaDec/Cordoba_Dec_DNI.csv', delimiter=",",
                      dtype=float)
 
@@ -76,7 +76,7 @@ Ib_dec = Ad*np.interp(t, DNI_dec[:,0], DNI_dec[:,1])
 
 fig, ax1 = plt.subplots()
 ax1.plot(t, Ib_march*1e-3, t, Ib_june*1e-3, t, Ib_dec*1e-3)
-plt.legend([r'June', r'March', r'Dec.'], loc='upper left')
+plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'$I_b$ (kW)')
 
@@ -104,13 +104,13 @@ plt.show()
 
 
 
-
 # ELECTRICITY GENERATION (MW)
 cl = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 rwidx = ['Hora', 'Eólica', 'Hidráulica', 'Solar fotovoltaica', 'Solar térmica',
-         'Térmica renovable', 'Cogeneración y residuos']
-nonrwidx = gen_march.columns.difference(rwidx[1:], sort=False)
+         'Térmica renovable']
+nonrwidx = ['Hora', 'Nuclear', 'Fuel/gas', 'Carbón', 'Ciclo combinado',
+       'Intercambios int', 'Enlace balear', 'Cogeneración y residuos']
 
 gen_march = pd.read_csv('./March_gen.csv', delimiter=";", encoding='latin-1')
 gen_rw_march = gen_march[rwidx]
@@ -157,7 +157,6 @@ plt.show()
 
 
 
-
 # ELECTRICITY PRICE (€/MWh)
 pelec_march = np.loadtxt('./March_pelec.csv',
                         delimiter=";", dtype=float)
@@ -167,8 +166,8 @@ pelec_dec = np.loadtxt('./Dec_pelec.csv',
                         delimiter=";", dtype=float)
 
 # Interpolacion
-pelec_june = np.interp(t, pelec_june[:,1], pelec_june[:,0])
 pelec_march = np.interp(t, pelec_march[:,1], pelec_march[:,0])
+pelec_june = np.interp(t, pelec_june[:,1], pelec_june[:,0])
 pelec_dec = np.interp(t, pelec_dec[:,1], pelec_dec[:,0])
 
 
@@ -180,10 +179,30 @@ ax1.set_ylabel(r'€/MWh')
 
 
 
+# CO2 EMISSIONS (t CO2 eq/MWh)
+em_march = np.loadtxt('./March_em.csv',
+                        delimiter=";", dtype=float)
+em_june = np.loadtxt('./June_em.csv',
+                        delimiter=";", dtype=float)
+em_dec = np.loadtxt('./Dec_em.csv',
+                        delimiter=";", dtype=float)
+
+# Interpolacion
+em_march = np.interp(t, em_march[:,0], em_march[:,1])
+em_june = np.interp(t, em_june[:,0], em_june[:,1])
+em_dec = np.interp(t, em_dec[:,0], em_dec[:,1])
+
+
+fig, ax1 = plt.subplots()
+plt.title(r'Emissions')
+plt.plot(t, em_march, t, em_june, t, em_dec)
+plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+ax1.set_xlabel(r'$t$ (h)')
+ax1.set_ylabel(r'CO$_2$ eq. t/MWh')
 
 
 
-
+#%% SOLAR DISH MODEL
 
 
 # Ib, G, Ti, Tamb = 28e3, 0.043, 330, 313.0
@@ -303,10 +322,10 @@ ax1.set_title('convergence')
 
 #%% CAIDA DE PRESION POR EFECTO DE LA TEMPERATURA (despreciable)
 
-p1 = 5e5
-T1 = 1e3
-T2 = 700
-rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
+# p1 = 5e5
+# T1 = 1e3
+# T2 = 700
+# rho1 = cpr.PropsSI('D', 'T', T1, 'P', p1, 'Air')
 
-p2, rho2, v2, T2  = pDrop(p1, T1, T2, G, 0.5)
+# p2, rho2, v2, T2  = pDrop(p1, T1, T2, G, 0.5)
 
