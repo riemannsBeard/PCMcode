@@ -129,6 +129,7 @@ As = sp.sparse.csr_matrix(As)
 
 
 # Heat addition in the solid
+qv = 1e-6
 Qv = 0*x
 Qv[3::8] = 2.5e-5
 Qv = sp.sparse.diags(Qv, 0).toarray()
@@ -195,9 +196,8 @@ for i in range(1,len(t)):
     # PDE solution -- TANK
     
     bc1[0] = Tin #Tf[i-1,0]
-    
 
-    Ts[i,:] = sp.sparse.linalg.spsolve(As - Qv, Ts[i-1,:] + rs*Tf[i-1,:])
+    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] + qv)
     Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                 r*Ts[i-1,1:])
     
