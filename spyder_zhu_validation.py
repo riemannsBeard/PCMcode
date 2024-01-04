@@ -22,14 +22,16 @@ matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
 #%% DEFAULTS
 
 plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'Times'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ["Computer Modern Roman"]
+plt.rcParams['axes.formatter.use_mathtext'] = True
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['axes.labelsize'] = 16
 plt.rcParams['axes.titlesize'] = 16
 plt.rcParams['figure.titlesize'] = 16
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
-plt.rcParams['lines.markersize'] = 3
+plt.rcParams['lines.markersize'] = 5
 
 #%% VALIDATION
 
@@ -69,9 +71,12 @@ print(list(zip(losses, Qloss/Ib*100)))
 
 y_pos = np.arange(len(losses))
 
+fig, ax = plt.subplots()
 plt.bar(y_pos, Qloss/Ib*100, align='center', alpha=0.5)
 plt.xticks(y_pos, losses, rotation='vertical')
-plt.ylabel('(\%)')
-plt.title('Losses')
-
+plt.ylabel(r'$Q_{loss}$ ($\%$)')
+plt.ylim([0, 16])
+# plt.title('Losses')
+ax.set_box_aspect(0.8)
+fig.savefig('Losses.eps', bbox_inches='tight')
 plt.show()

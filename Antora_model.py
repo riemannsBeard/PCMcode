@@ -40,7 +40,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 6.1
+L = 20.75 #3.88 #6.1
 eps = 0.22
 dx = 2.2e-2
 xf = L
@@ -50,19 +50,19 @@ dx = x[1] - x[0]
 Nx = len(x) - 1
 
 tf = 24*3600
-dt = 0.36 #3.6
+dt = 3.6
 t = np.arange(0, tf + dt, dt)/3600
 Nt = len(t)
 
 x = np.arange(0, xf + dx, dx)
 
 d = 0.015
-mDot = 0.04
+mDot = 0.137 #0.04
 
 rhos = 1800
 ks = 120
 
-Tin = 51 + 273
+Tin = 700 + 273 #51 + 273
 
 Tf = np.zeros((Nt, Nx+1))
 Ts = np.zeros((Nt, Nx+1))
@@ -72,7 +72,7 @@ Tf[:,0] = Tin
 bc1 = np.zeros(Nx)
 
 # ICs
-T00 = 500 + 273
+T00 = 1000 + 273 #500 + 273
 Tf[0,:] = T00
 Ts[0,:] = T00
 
@@ -89,7 +89,7 @@ beta = eps*kair
 gamma = (1-eps)*rhos*cpG(T00)
 betas = ks*(1 - eps)
 
-D = 3    
+D = 2*1.3 #3    
 u = 4*mDot/(rhof*eps*np.pi*D**2)
 
 Rep = rhof*d*u/mu
@@ -159,7 +159,7 @@ for i in range(1,len(t)):
     gamma = (1-eps)*rhos*cpG(T00)
     betas = ks*(1 - eps)
 
-    D = 3    
+    D = 3.5*2 #3    
     u = 4*mDot/(rhof*eps*np.pi*D**2)
 
     Rep = rhof*d*u/mu
@@ -197,7 +197,7 @@ for i in range(1,len(t)):
     
     bc1[0] = Tin #Tf[i-1,0]
 
-    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] + qv)
+    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
     Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                 r*Ts[i-1,1:])
     
@@ -222,10 +222,10 @@ for i in range(1,len(t)):
 
 fig, ax = plt.subplots()
 
-cs1 = ax.contourf(x, t, Tf-273, 32)
+cs1 = ax.contourf(x, t, Tf-273, 32, extend='both')
 plt.tight_layout()
 cbar1 = plt.colorbar(cs1)
-cbar1.set_label(r'$T_f$ ($^\circ C$)', fontsize=16)
+cbar1.set_label(r'$T_f$ ($^\circ$C)', fontsize=16)
 ax.set_ylabel(r'$t$ (h)')
 ax.set_xlabel(r'$L$ (m)')
 ax.set_box_aspect(1)
@@ -236,10 +236,10 @@ plt.show()
 
 fig, ax = plt.subplots()
 
-cs1 = ax.contourf(x, t, Ts-273, 32)
+cs1 = ax.contourf(x, t, Ts-273, 32, extend='both')
 plt.tight_layout()
 cbar1 = plt.colorbar(cs1)
-cbar1.set_label(r'$T_s$ ($^\circ C$)', fontsize=16)
+cbar1.set_label(r'$T_s$ ($^\circ$C)', fontsize=16)
 ax.set_ylabel(r'$t$ (h)')
 ax.set_xlabel(r'$L$ (m)')
 ax.set_box_aspect(1)

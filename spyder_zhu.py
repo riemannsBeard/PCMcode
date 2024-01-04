@@ -14,9 +14,7 @@ import csv
 import matplotlib_inline
 import warnings
 
-
 from functions import *
-
 
 warnings.filterwarnings('ignore')
 matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
@@ -24,13 +22,15 @@ matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
 #%% DEFAULTS
 
 plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'Times'
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['axes.labelsize'] = 14
-plt.rcParams['axes.titlesize'] = 14
-plt.rcParams['figure.titlesize'] = 14
-plt.rcParams['xtick.labelsize'] = 12
-plt.rcParams['ytick.labelsize'] = 12
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ["Computer Modern Roman"]
+plt.rcParams['axes.formatter.use_mathtext'] = True
+plt.rcParams['legend.fontsize'] = 20
+plt.rcParams['axes.labelsize'] = 20
+plt.rcParams['axes.titlesize'] = 20
+plt.rcParams['figure.titlesize'] = 20
+plt.rcParams['xtick.labelsize'] = 20
+plt.rcParams['ytick.labelsize'] = 20
 plt.rcParams['lines.markersize'] = 3
 
 #%% LOAD DATA
@@ -56,7 +56,9 @@ Tamb_dec = np.interp(t, Tamb_dec[:,0], Tamb_dec[:,1]) + 273
 
 fig, ax1 = plt.subplots()
 ax1.plot(t, Tamb_march - 273, t, Tamb_june - 273, t, Tamb_dec - 273)
-plt.legend([r'June', r'March', r'Dec.'], loc='upper left')
+plt.legend([r'March 24th', r'June 24th', 
+            r'Dec. 22th'], loc='upper left')
+ax1.set_box_aspect(1)
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'$T$ ($^\circ$C)')
 
@@ -76,7 +78,9 @@ Ib_dec = Ad*np.interp(t, DNI_dec[:,0], DNI_dec[:,1])
 
 fig, ax1 = plt.subplots()
 ax1.plot(t, Ib_march*1e-3, t, Ib_june*1e-3, t, Ib_dec*1e-3)
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+plt.legend([r'March 24th', r'June 24th', 
+            r'Dec. 22th'], loc='upper left')
+ax1.set_box_aspect(1)
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'$I_b$ (kW)')
 
@@ -97,7 +101,8 @@ dem_dec = np.interp(t, dem_dec[:,0], dem_dec[:,1])
 fig, ax1 = plt.subplots()
 plt.plot(t, dem_march, t, dem_june, t, dem_dec)
 plt.title('Energy Demand')
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+plt.legend([r'March 24th', r'June 24th', 
+            r'Dec. 22th'], loc='upper left')
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'MW')
 plt.show()
@@ -156,7 +161,6 @@ ax1.set_ylabel(r'MW')
 plt.show()
 
 
-
 # ELECTRICITY PRICE (€/MWh)
 pelec_march = np.loadtxt('./March_pelec.csv',
                         delimiter=";", dtype=float)
@@ -173,7 +177,8 @@ pelec_dec = np.interp(t, pelec_dec[:,1], pelec_dec[:,0])
 
 fig, ax1 = plt.subplots()
 plt.plot(t, pelec_march, t, pelec_june, t, pelec_dec)
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+plt.legend([r'March 24th', r'June 24th', 
+            r'Dec. 22th'], loc='upper left')
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'€/MWh')
 
@@ -196,7 +201,8 @@ em_dec = np.interp(t, em_dec[:,0], em_dec[:,1])
 fig, ax1 = plt.subplots()
 plt.title(r'Emissions')
 plt.plot(t, em_march, t, em_june, t, em_dec)
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+plt.legend([r'March 24th', r'June 24th', 
+            r'Dec. 22th'], loc='upper left')
 ax1.set_xlabel(r'$t$ (h)')
 ax1.set_ylabel(r'CO$_2$ eq. t/MWh')
 
@@ -222,7 +228,7 @@ unks00 = np.array([Ti0*1.05, Ti0*1.10, Ti0*1.15, Ti0*1.20,
 # mu = cp.PropsSI('V', 'T', 1273, 'P', 5e5, 'Air')
 
 monthNo = 0, 1, 2
-month = 'March', 'June', 'December'
+month = 'March 24th', 'June 24th', 'Dec. 24th'
 
 Ibs = np.array([Ib_march, Ib_june, Ib_dec])
 Tambs = np.array([Tamb_march, Tamb_june, Tamb_dec])
@@ -294,6 +300,7 @@ for j in range(0, 3):
                 r'$I_b$ (kW)'], loc='upper left')
     ax1.set_xlabel(r'$t$ (h)')
     ax1.set_title(month[j])
+    ax1.set_box_aspect(0.8)
     # ax1.set_ylim([-5, 105])
     
     
@@ -304,7 +311,8 @@ for j in range(0, 3):
     ax2.tick_params(axis='y', labelcolor=color)
     ax2.set_ylim([-5, 105])
     ax2.set_title(month[j])
-    
+    ax2.set_box_aspect(0.8)
+
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     plt.show()
 

@@ -55,7 +55,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 6.1
+L = 10 #21.25 #6.1
 eps = 0.22
 dx = 2.2e-2
 xf = L
@@ -85,15 +85,14 @@ Tin[Tin < 500] = 500
 Tf = np.zeros((Nt, Nx+1))
 Ts = np.zeros((Nt, Nx+1))
 
-# BCs
-Tf[:,0] = Tin
-bc1 = np.zeros(Nx)
-
 # ICs
-T00 = Tin[0] #500 + 273
+T00 = 800 + 273 #Tin[0] #500 + 273
 Tf[0,:] = T00
 Ts[0,:] = T00
 
+# BCs
+Tf[:,0] = Tin
+bc1 = np.zeros(Nx)
 
 #%% MATRIX ASSEMBLY
 
@@ -107,7 +106,7 @@ beta = eps*kair
 gamma = (1-eps)*rhos*cpG(T00)
 betas = ks*(1 - eps)
 
-D = 3
+D = 1.67*2 #3
 R = 0.5*D
 u = 4*mDot/(rhof*eps*np.pi*D**2)
 
@@ -249,7 +248,7 @@ for i in range(1,len(t)):
     
     bc1[0] = Tin[i] #Tf[i-1,0]
 
-    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] + qv[i,:])
+    Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] + 0*qv[i,:])
     Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                 r*Ts[i-1,1:])
     
@@ -302,11 +301,12 @@ plt.show()
 #%% PLOTS
 fig, ax = plt.subplots()
 
+plt.plot(t/3600, Tf[:,0], 'k--')
 plt.plot(t/3600, Tf[:,int(len(x)/4)]-273, t/3600, Tf[:,int(len(x)/2)]-273,
          t/3600, Tf[:,int(3*len(x)/4)]-273, t/3600, Tf[:,-1]-273)
 plt.ylabel(r'$T_f$ ($^\circ C$)')
 plt.xlabel(r'$t$ (h)')
-plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
+plt.legend([r'$x = 0$', r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
 
 plt.show()
 
