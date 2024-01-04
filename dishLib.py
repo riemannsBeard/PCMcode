@@ -15,6 +15,19 @@ import warnings
 
 from functions import *
 
+#%% DEFAULTS
+
+plt.rcParams['text.usetex'] = True
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ["Computer Modern Roman"]
+plt.rcParams['legend.fontsize'] = 12
+plt.rcParams['axes.labelsize'] = 16
+plt.rcParams['axes.titlesize'] = 16
+plt.rcParams['figure.titlesize'] = 16
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
+plt.rcParams['lines.markersize'] = 3
+
 
 #%% LOAD DATA
 
@@ -25,12 +38,19 @@ t = np.arange(0, tf + dt, dt)
 ts = t
 G0 = 0.043
 
+loc = ['Cordoba', 'Malaga']
+loc_ = loc[1]
+
+
 # AMBIENT TEMPERATURE
-Tamb_june = np.loadtxt(r"./CordobaJune/Cordoba_June_Tamb.csv",
+Tamb_june = np.loadtxt('./' + loc_ + 'June/' +
+                       loc_ + '_June_Tamb.csv',
                        delimiter=",", dtype=float)
-Tamb_march = np.loadtxt('./CordobaMarch/Cordoba_March_Tamb.csv',
+Tamb_march = np.loadtxt('./' + loc_ + 'March/' + 
+                        loc_ + '_March_Tamb.csv',
                         delimiter=",", dtype=float)
-Tamb_dec = np.loadtxt('./CordobaDec/Cordoba_Dec_Tamb.csv',
+Tamb_dec = np.loadtxt('./' + loc_ + 'Dec/' + 
+                      loc_ + '_Dec_Tamb.csv',
                       delimiter=",", dtype=float)
 
 # Interpolacion
@@ -40,11 +60,14 @@ Tamb_dec = np.interp(t, Tamb_dec[:,0], Tamb_dec[:,1]) + 273
 
 
 # DNI (W/m^2) and Ib (W)
-DNI_march = np.loadtxt('./CordobaMarch/Cordoba_March_DNI.csv', delimiter=",",
+DNI_march = np.loadtxt('./' + loc_ + 'March/' + 
+                       loc_ + '_March_DNI.csv', delimiter=",",
                        dtype=float)
-DNI_june = np.loadtxt('./CordobaJune/Cordoba_June_DNI.csv', delimiter=",",
+DNI_june = np.loadtxt('./' + loc_ + 'June/' + loc_ +
+                      '_June_DNI.csv', delimiter=",",
                       dtype=float)
-DNI_dec = np.loadtxt('./CordobaDec/Cordoba_Dec_DNI.csv', delimiter=",",
+DNI_dec = np.loadtxt('./' + loc_ + 'Dec/' + loc_ +
+                     '_Dec_DNI.csv', delimiter=",",
                      dtype=float)
 
 # Interpolacion
@@ -141,10 +164,11 @@ for j in range(0, 3):
     #%% PLOTS
     
     fig, ax1 = plt.subplots()
-    ax1.plot(t, (Tambs[j] - 273), t, To[:,j]/10, t, Tf/10, t, Ibs[j]/1e3, 'k--')
+    ax1.plot(t, (Tambs[j] - 273), t, To[:,j]/10, t, Tf/10, t, Ibs[j]/1e3, 'k-')
     plt.legend([r'$T_a$ ($^\circ$C)',  r'$T_o/10$ ($^\circ$C)', r'$T_f/10$ ($^\circ$C)',
                 r'$I_b$ (kW)'], loc='upper left')
     ax1.set_xlabel(r'$t$ (h)')
+    ax1.set_ylim([-5, 85])
     ax1.set_title(month[j])
     # ax1.set_ylim([-5, 105])
     
@@ -158,7 +182,10 @@ for j in range(0, 3):
     ax2.set_title(month[j])
     
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.savefig('./' + loc_+ '_' + str(month[j]) + '.eps', bbox_inches='tight',
+                format='eps')
     plt.show()
+
 
 
 # fig, ax1 = plt.subplots()

@@ -22,7 +22,8 @@ warnings.filterwarnings('ignore')
 #%% DEFAULTS
 
 plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'Times'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ["Computer Modern Roman"]
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['axes.labelsize'] = 16
 plt.rcParams['axes.titlesize'] = 16
