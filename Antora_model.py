@@ -252,7 +252,7 @@ fig, ax = plt.subplots()
 
 plt.plot(t, Tf[:,int(len(x)/4)]-273, t, Tf[:,int(len(x)/2)]-273,
          t, Tf[:,int(3*len(x)/4)]-273, t, Tf[:,-1]-273)
-plt.ylabel(r'$T_f$ ($^\circ C$)')
+plt.ylabel(r'$T_f$ ($^\circ$C)')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
 
@@ -264,7 +264,7 @@ fig, ax = plt.subplots()
 
 plt.plot(t, Ts[:,int(len(x)/4)]-273, t, Ts[:,int(len(x)/2)]-273,
          t, Ts[:,int(3*len(x)/4)]-273, t, Ts[:,-1]-273)
-plt.ylabel(r'$T_s$ ($^\circ C$)')
+plt.ylabel(r'$T_s$ ($^\circ$C)')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
 

@@ -36,21 +36,18 @@ tf = 24
 dt = 0.5
 t = np.arange(0, tf + dt, dt)
 ts = t
-G0 = 0.043
+G0 = 0.043/2
 
 loc = ['Cordoba', 'Malaga']
-loc_ = loc[1]
+loc_ = loc[0]
 
 
 # AMBIENT TEMPERATURE
-Tamb_june = np.loadtxt('./' + loc_ + 'June/' +
-                       loc_ + '_June_Tamb.csv',
+Tamb_june = np.loadtxt('./' + loc_ + 'June/' + loc_ + '_June_Tamb.csv',
                        delimiter=",", dtype=float)
-Tamb_march = np.loadtxt('./' + loc_ + 'March/' + 
-                        loc_ + '_March_Tamb.csv',
+Tamb_march = np.loadtxt('./' + loc_ + 'March/' + loc_ + '_March_Tamb.csv',
                         delimiter=",", dtype=float)
-Tamb_dec = np.loadtxt('./' + loc_ + 'Dec/' + 
-                      loc_ + '_Dec_Tamb.csv',
+Tamb_dec = np.loadtxt('./' + loc_ + 'Dec/' + loc_ + '_Dec_Tamb.csv',
                       delimiter=",", dtype=float)
 
 # Interpolacion
@@ -60,8 +57,8 @@ Tamb_dec = np.interp(t, Tamb_dec[:,0], Tamb_dec[:,1]) + 273
 
 
 # DNI (W/m^2) and Ib (W)
-DNI_march = np.loadtxt('./' + loc_ + 'March/' + 
-                       loc_ + '_March_DNI.csv', delimiter=",",
+DNI_march = np.loadtxt('./' + loc_ + 'March/' + loc_ +
+                       '_March_DNI.csv', delimiter=",",
                        dtype=float)
 DNI_june = np.loadtxt('./' + loc_ + 'June/' + loc_ +
                       '_June_DNI.csv', delimiter=",",
@@ -101,7 +98,7 @@ month = 'March', 'June', 'December'
 Ibs = np.array([Ib_march, Ib_june, Ib_dec])
 Tambs = np.array([Tamb_march, Tamb_june, Tamb_dec])
 
-To = np.zeros((len(t),3))
+To = np.zeros((3,len(t)))
 
 for j in range(0, 3):
     
@@ -135,17 +132,17 @@ for j in range(0, 3):
             unks0 = unks00
         else:
             unks0 = np.array([T1[i-1], T2[i-1], T3[i-1], T4[i-1], Tf[i-1], Tw[i-1],
-                              Tgi[i-1], Tgo[i-1], To[i-1,j]]) + 273
+                              Tgi[i-1], Tgo[i-1], To[j,i-1]]) + 273
     
         sol = root(dish, unks0, args=args0, method='lm')
-        T1[i], T2[i], T3[i], T4[i], Tf[i], Tw[i], Tgi[i], Tgo[i], To[i,j] = sol.x
+        T1[i], T2[i], T3[i], T4[i], Tf[i], Tw[i], Tgi[i], Tgo[i], To[j,i] = sol.x
         flag[j,i] = sol.success
         
         Qloss[:,i] = Qlosses(Ib, Tamb, T1[i], T2[i], T3[i], T4[i], Tf[i], Tw[i],
-                        Tgi[i], Tgo[i], To[i,j])
+                        Tgi[i], Tgo[i], To[j,i])
         eta[i] = (Ib - np.sum(Qloss[:,i]))/Ib
         
-        T1[i], T2[i], T3[i], T4[i], Tf[i], Tw[i], Tgi[i], Tgo[i], To[i,j] = sol.x - 273
+        T1[i], T2[i], T3[i], T4[i], Tf[i], Tw[i], Tgi[i], Tgo[i], To[j,i] = sol.x - 273
     
         temps = ('Ti', 'T1', 'T2', 'T3', 'T4', 'Tf', 'Tw', 'Tgi', 'Tgo', 'To')
         losses = ('glass emission', 'glass reflectance', 'foam emission',
@@ -164,7 +161,7 @@ for j in range(0, 3):
     #%% PLOTS
     
     fig, ax1 = plt.subplots()
-    ax1.plot(t, (Tambs[j] - 273), t, To[:,j]/10, t, Tf/10, t, Ibs[j]/1e3, 'k-')
+    ax1.plot(t, (Tambs[j] - 273), t, To[j,:]/10, t, Tf/10, t, Ibs[j]/1e3, 'k-')
     plt.legend([r'$T_a$ ($^\circ$C)',  r'$T_o/10$ ($^\circ$C)', r'$T_f/10$ ($^\circ$C)',
                 r'$I_b$ (kW)'], loc='upper left')
     ax1.set_xlabel(r'$t$ (h)')
