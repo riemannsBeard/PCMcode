@@ -95,7 +95,7 @@ for ii in range(0, 3):
         Ts = np.zeros((Nt, Nx+1))
         
         # ICs
-        T00 = 500 + 273 #Tin[0] #500 + 273
+        T00 = 227 + 273 #Tin[0] #500 + 273
         Tf[0,:] = T00
         Ts[0,:] = T00
         
@@ -160,6 +160,8 @@ for ii in range(0, 3):
         # Qv = sp.sparse.diags(Qv, 0).toarray()
         
         QQ = t*0
+        Tf0 = t*0
+        Tf0[0] = T00
         
         #%% SOLUTION
         
@@ -184,6 +186,8 @@ for ii in range(0, 3):
         
         for i in range(1,len(t)):
             
+            cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+ 
             # if t[i]/3600 >= 7:
             # erri += Tref - Tf[i-1,-1]
             
@@ -210,7 +214,7 @@ for ii in range(0, 3):
             # qv[i, qv[i,:] < 0] = 0
 
             
-            if Tin[i] >= Tref:
+            if Tin[i] >= Tref :
     
                 # ODE solution -- TES
                    
@@ -230,7 +234,7 @@ for ii in range(0, 3):
                 alpha = eps*rhof*cp
                 beta = eps*kair
                 
-                gamma = (1-eps)*rhos*cpG(T00)
+                gamma = (1-eps)*rhos*cpG(np.mean(Ts[i-1,:]))
                 betas = ks*(1 - eps)
             
                 u = 4*mDot/(rhof*eps*np.pi*D**2)
@@ -278,10 +282,17 @@ for ii in range(0, 3):
                 Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
                 Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                             r*Ts[i-1,1:])
+                    
+                Tf0[i] = Tref
+                QQ[i] = mDot*cp*(Tref - Tf[i,-1])
                 
-            else:
-                QQ[i] = G*cp*(Tref - Tf[i,-1])
-                Tf[i,-1] = Tref
+            else :
+                
+                Tf[i,:] = Tf[i-1,:]
+                Ts[i,:] = Ts[i-1,:]
+                
+                Tf0[i] = Tref
+                QQ[i] = mDot*cp*(Tref - Tf[i,-1])
                 
                 # Heat transfer accross molten salts
                 # qf[i] = 0.25*u*np.pi*d**2*eps*rhof*(Tf[i,15] - Tf[i,-15])*cpf
@@ -291,7 +302,8 @@ for ii in range(0, 3):
                 
         #%% Energy
         
-        E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
+        # E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
+        E = np.trapz(QQ, t/3600)
         
         display('E = ' + str(E) + ' kWh')
         
@@ -379,8 +391,20 @@ for ii in range(0, 3):
         #%% PLOTS
         fig, ax = plt.subplots()
         
-        plt.plot(t[1:]/3600, np.sum(qv[1:,:], axis=1))
-        plt.ylabel(r'$\dot{q}_t$ (W)')
+        plt.plot(t/3600, Tf0-273)
+        plt.ylabel(r'$T_{f0}$ ($^\circ$C)')
+        plt.xlabel(r'$t$ (h)')
+        # plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
+        
+        plt.show()        
+        
+        #%% PLOTS
+        fig, ax = plt.subplots()
+        
+        plt.plot(t/3600, QQ/1e3)
+        plt.plot(t/3600, QQ*0 + 27, 'k--')
+        
+        plt.ylabel(r'$\dot{Q}_0$ (kW)')
         plt.xlabel(r'$t$ (h)')
         
         plt.show()
