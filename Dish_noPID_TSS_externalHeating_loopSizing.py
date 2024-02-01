@@ -87,7 +87,7 @@ E = np.zeros(3)
 for mm in range(0, len(G0v)):
     
     G0 = G0v[mm]
-    To, ts, month, loc_ = computeDish(G0, 1)
+    To, ts, month, loc_ = computeDish(G0, 0)
 
     for jj in range(0, len(LbyD)):
         
@@ -473,23 +473,25 @@ for mm in range(0, len(G0v)):
 # plt.ylabel(r'$\tilde{Q}_0^*$')
 # plt.show()
 
-
+R = (650 - EE)/650
 with open('./EE_vs_LbyD_vs_mDot_' + loc_, 'w') as archivo:
 # Escribir el resultado en el archivo
-    archivo.write(str(EE))
+    archivo.write(str(R))
     
     
 with open('./EE_vs_LbyD_vs_mDot_' + loc_ + '.json', 'w') as archivo:
 # Escribir el resultado en el archivo
-    json.dump(EE.tolist(), archivo)
+    json.dump(R.tolist(), archivo)
 
       #%% TOTAL ENERGY
+      
+loc_ = 'Malaga'
           
 fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
-cs1 = ax.contourf(0.043/G0v, LbyD, EE, 16)
+cs1 = ax.contourf(0.043/G0v, LbyD, data, np.linspace(0.20, 0.60, 13))
 plt.tight_layout()
 cbar1 = plt.colorbar(cs1)
-cbar1.set_label(r'$\overline{Q}_0$ (kWh)', fontsize=12)
+cbar1.set_label(r'$\mathcal{R}$', fontsize=12)
 ax.set_ylabel(r'$L/D$')
 ax.set_xlabel(r'$N$')
 ax.set_box_aspect(1)
@@ -499,12 +501,13 @@ plt.show()
 
 
 fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
-c = ax1.pcolor(0.043/G0v, LbyD, EE, edgecolors='k', linewidths=2)
+c = ax1.pcolor(0.043/G0v, LbyD, data, edgecolors='k', linewidths=2)
 ax1.set_ylabel(r'$L/D$')
 ax1.set_xlabel(r'$N$')
 ax1.set_box_aspect(1)
-fig.colorbar(c)
-ax1.set_title(r'$\overline{Q}_0$ (kWh)', fontsize=12)
+cbar1 = plt.colorbar(c)
+cs1.set_clim(vmin=0.2, vmax=0.6)
+cbar1.set_label(r'$\mathcal{R}$', fontsize=12)
 plt.savefig('./Q0_vs_LbyD_vs_mDot_pcolor' + loc_ +'.eps',
             bbox_inches='tight', format='eps')
 plt.show()
