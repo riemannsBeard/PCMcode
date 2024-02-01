@@ -58,10 +58,10 @@ def cpG(T):
 
 for ii in range(0, 3):
 
-        L = 4.5
+        L = 1 #4.5
         D = L/2 #1.67*2 #3
 
-        eps = 0.22
+        eps = 0.22 #0.22
         dx = 2.2e-2
         xf = L
         x = np.arange(0, xf + dx, dx)
@@ -95,7 +95,7 @@ for ii in range(0, 3):
         Ts = np.zeros((Nt, Nx+1))
         
         # ICs
-        T00 = 227 + 273 #Tin[0] #500 + 273
+        T00 = 227 + 273
         Tf[0,:] = T00
         Ts[0,:] = T00
         
@@ -153,35 +153,34 @@ for ii in range(0, 3):
         As = sp.sparse.csr_matrix(As)
         
         
-        # # Heat addition in the solid
+        # Heat addition in the solid
         # qv = 0.0
         # Qv = 0*x
         # Qv[3::8] = 2.5e-5
         # Qv = sp.sparse.diags(Qv, 0).toarray()
         
-        QQ = t*0
-        Tf0 = t*0
+
         Tf0[0] = T00
         
         #%% SOLUTION
         
         # PID initialization
-        # err = t*0
-        # erri = 0
-        # qv = Ts*0
+        err = t*0
+        erri = 0
+        qv = Ts*0
         
         Tref = 800 + 273
         
-        # # Gains
-        # Kp = 1e4
-        # Ki = 0
-        # Kd = 0
+        # Gains
+        Kp = 1e4
+        Ki = 0
+        Kd = 0
         
-        # # Resistors position (equally spaced)
+        # Resistors position (equally spaced)
     
-        # # xqv0 = int(0.5/dx)
-        # xqv1 = int(L/2/dx)
-        # xqv2 = int(4.25/dx)
+        # xqv0 = int(0.5/dx)
+        xqv1 = int(L/2/dx)
+        xqv2 = int(4.25/dx)
     
         
         for i in range(1,len(t)):
@@ -191,15 +190,15 @@ for ii in range(0, 3):
             # if t[i]/3600 >= 7:
             # erri += Tref - Tf[i-1,-1]
             
-            # # Error update
-            # err[i] = Tref - Tf[i-1,-1]
+            # Error update
+            err[i] = Tref - Tf[i-1,-1]
             
-            # # qv[i,xqv0] = Kp*err[i] + Ki*erri*dt +\
-            # #                         Kd*(err[i] - err[i-1])/dt                                        
-            # qv[i,xqv1] = Kp*err[i] + Ki*erri*dt +\
-            #                         Kd*(err[i] - err[i-1])/dt
-            # qv[i,xqv2] = Kp*err[i] + Ki*erri*dt +\
-            #                         Kd*(err[i] - err[i-1])/dt
+            # qv[i,xqv0] = Kp*err[i] + Ki*erri*dt +\
+            #                         Kd*(err[i] - err[i-1])/dt                                        
+            qv[i,xqv1] = Kp*err[i] + Ki*erri*dt +\
+                                    Kd*(err[i] - err[i-1])/dt
+            qv[i,xqv2] = Kp*err[i] + Ki*erri*dt +\
+                                    Kd*(err[i] - err[i-1])/dt
                                         
                 # qv[i,xqv3] = Kp*err[i] + Ki*erri*dt +\
                 #                         Kd*(err[i] - err[i-1])/dt
@@ -211,99 +210,84 @@ for ii in range(0, 3):
                 #                         Kd*(err[i] - err[i-1])/dt
                 
             # Set 0 to any of nonpositive values
-            # qv[i, qv[i,:] < 0] = 0
+            qv[i, qv[i,:] < 0] = 0
 
             
-            if Tin[i] >= Tref :
     
-                # ODE solution -- TES
-                   
-                
-                # ----------------------------------------------------------------------- #
-                # ----------------------------------------------------------------------- #
-                # ----------------------------------------------------------------------- #
-                
-                # TES TANK -- fluid properties changing with temperature
-                
-                # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
-                
-                alpha = eps*rhof*cp
-                beta = eps*kair
-                
-                gamma = (1-eps)*rhos*cpG(np.mean(Ts[i-1,:]))
-                betas = ks*(1 - eps)
+            # ODE solution -- TES
+               
             
-                u = 4*mDot/(rhof*eps*np.pi*D**2)
+            # ----------------------------------------------------------------------- #
+            # ----------------------------------------------------------------------- #
+            # ----------------------------------------------------------------------- #
             
-                Rep = rhof*d*u/mu
-                Pr = cp*mu/kair
-                Nu = 0.664*Rep**0.5*Pr**0.5
-                a = Nu*kair/d
-                h = 6*(1-eps)*beta*(2 + 1.1*Rep**(0.6)*Pr**(1/3))/(d**2)
+            # TES TANK -- fluid properties changing with temperature
             
-                p = dt*u/dx
-                q = 2*beta/alpha*0.5*dt/(dx**2)
-                r = h*dt/alpha
+            # Air density at 5 bar
+            rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+            cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+            kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+            mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
             
-                rs = dt*h/gamma
-                qs = 2*betas*0.5*dt/(gamma*dx**2)
-                
-                
-                diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
-                             np.ones(Nx)*(-p-q)]
-                offsets = [0, 1, -1]
-                A.setdiag(diagonals[0], offsets[0])
-                A.setdiag(diagonals[1], offsets[1])
-                A.setdiag(diagonals[2], offsets[2])
-                A[-1,-2] = -2*q - p
-                
-                diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
-                             np.ones(Nx + 1)*(-qs)]
-                offsets = [0, 1, -1]
-                As.setdiag(diagonals[0], offsets[0])
-                As.setdiag(diagonals[1], offsets[1])
-                As.setdiag(diagonals[2], offsets[2])
-                As[-1,-2] = -2*qs
-                As[0,1] = -2*qs  
-                    
-                # PDE solution -- TANK
-                
-                bc1[0] = Tin[i] #Tf[i-1,0]
+            alpha = eps*rhof*cp
+            beta = eps*kair
             
-                # Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] +
-                #                                    (1-eps)*qv[i,:])
+            gamma = (1-eps)*rhos*cpG(np.mean(Ts[i-1,:]))
+            betas = ks*(1 - eps)
+        
+            u = 4*mDot/(rhof*eps*np.pi*D**2)
+        
+            Rep = rhof*d*u/mu
+            Pr = cp*mu/kair
+            Nu = 0.664*Rep**0.5*Pr**0.5
+            a = Nu*kair/d
+            h = 6*(1-eps)*beta*(2 + 1.1*Rep**(0.6)*Pr**(1/3))/(d**2)
+        
+            p = dt*u/dx
+            q = 2*beta/alpha*0.5*dt/(dx**2)
+            r = h*dt/alpha
+        
+            rs = dt*h/gamma
+            qs = 2*betas*0.5*dt/(gamma*dx**2)
+            
+            
+            diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
+                         np.ones(Nx)*(-p-q)]
+            offsets = [0, 1, -1]
+            A.setdiag(diagonals[0], offsets[0])
+            A.setdiag(diagonals[1], offsets[1])
+            A.setdiag(diagonals[2], offsets[2])
+            A[-1,-2] = -2*q - p
+            
+            diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
+                         np.ones(Nx + 1)*(-qs)]
+            offsets = [0, 1, -1]
+            As.setdiag(diagonals[0], offsets[0])
+            As.setdiag(diagonals[1], offsets[1])
+            As.setdiag(diagonals[2], offsets[2])
+            As[-1,-2] = -2*qs
+            As[0,1] = -2*qs  
+                
+            # PDE solution -- TANK
+            
+            bc1[0] = Tin[i] #Tf[i-1,0]
+        
+            Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:] +
+                                                (1-eps)*qv[i,:])
+            Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
+                        r*Ts[i-1,1:] + eps*qv[i,1:])
+                
+                # Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
                 # Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
-                #             r*Ts[i-1,1:] + eps*qv[i,1:])
-                
-                Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
-                Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
-                            r*Ts[i-1,1:])
+                #             r*Ts[i-1,1:])
                     
-                Tf0[i] = Tref
-                QQ[i] = mDot*cp*(Tref - Tf[i,-1])
                 
-            else :
-                
-                Tf[i,:] = Tf[i-1,:]
-                Ts[i,:] = Ts[i-1,:]
-                
-                Tf0[i] = Tref
-                QQ[i] = mDot*cp*(Tref - Tf[i,-1])
-                
-                # Heat transfer accross molten salts
-                # qf[i] = 0.25*u*np.pi*d**2*eps*rhof*(Tf[i,15] - Tf[i,-15])*cpf
-                
-                # theta6[i,k] = Tf[i,-1]/T0
+
             
                 
         #%% Energy
         
-        # E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
-        E = np.trapz(QQ, t/3600)
+        E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
         
         display('E = ' + str(E) + ' kWh')
         
@@ -401,8 +385,11 @@ for ii in range(0, 3):
         #%% PLOTS
         fig, ax = plt.subplots()
         
+        QQtheo = mDot*cpr.PropsSI('C', 'T', 0.5*(T00 + Tref),
+                                  'P', 5e5, 'Air')*(Tref - T00)
+        
         plt.plot(t/3600, QQ/1e3)
-        plt.plot(t/3600, QQ*0 + 27, 'k--')
+        plt.plot(t/3600, QQ*0 + QQtheo/1e3, 'k--')
         
         plt.ylabel(r'$\dot{Q}_0$ (kW)')
         plt.xlabel(r'$t$ (h)')

@@ -12,7 +12,6 @@ import csv
 import matplotlib_inline
 import warnings
 
-
 from functions import *
 
 #%% DEFAULTS
@@ -36,10 +35,10 @@ tf = 24
 dt = 0.5
 t = np.arange(0, tf + dt, dt)
 ts = t
-G0 = 0.043/2
+# G0 = 0.043/2
 
 loc = ['Cordoba', 'Malaga']
-loc_ = loc[0]
+loc_ = loc[1]
 
 
 # AMBIENT TEMPERATURE
