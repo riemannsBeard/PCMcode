@@ -32,6 +32,8 @@ plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['lines.markersize'] = 1
 
+cm = 1/2.54 
+
 
 #%% DISH STUFF
 
@@ -85,8 +87,10 @@ ks = 120
 ##
 
 QQ = np.zeros((3, len(t)))
+pp = np.zeros((3, len(t)))
 EE = 0
 E = np.zeros(3)
+price = np.zeros(3)
 
 ##
 
@@ -97,6 +101,29 @@ N = 2
 To, ts, month, loc_ = computeDish(G0/N, 0)
 
 ##
+
+#%% ENERGY PRICE
+
+# Price €/MWh
+march_pelec = np.loadtxt('./March_pelec.csv', delimiter=";",
+                       dtype=float)
+june_pelec = np.loadtxt('./June_pelec.csv', delimiter=";",
+                      dtype=float)
+dec_pelec = np.loadtxt('./Dec_pelec.csv', delimiter=";",
+                     dtype=float)
+
+march_pelec = np.vstack([march_pelec, [286.25, 24.]])
+june_pelec = np.vstack([june_pelec, [354.52, 24.]])
+dec_pelec = np.vstack([dec_pelec, [67., 24.]])
+
+
+# Interpolacion
+pp[0,:] = np.interp(t/3600, march_pelec[:,1], march_pelec[:,0])
+pp[1,:] = np.interp(t/3600, june_pelec[:,1], june_pelec[:,0])
+pp[2,:] = np.interp(t/3600, dec_pelec[:,1], dec_pelec[:,0])
+
+
+#%% MONTHS LOOP
 
 
 # LL = np.arange(0.25, 2.25, 0.25)
@@ -325,6 +352,20 @@ for ii in range(0, 3):
                   month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
             archivo.write(str(int(np.round(E[ii],0))))
+            
+            
+#%% Price
+        
+        # E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
+        price[ii] = np.trapz(QQ[ii,:]/1e6*pp[ii,:], t/3600)
+        
+        
+        display('price = ' + str(price[ii]) + ' €')
+        
+        with open('./pp_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+                  month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+        # Escribir el resultado en el archivo
+            archivo.write(str(int(np.round(price[ii],0))))
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -339,7 +380,6 @@ for ii in range(0, 3):
             
             
 #%% PLOTS
-        cm = 1/2.54 
         
         fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
         
@@ -369,7 +409,6 @@ for ii in range(0, 3):
                     bbox_inches='tight', format='eps')
         
         plt.show()
-        
         
         #%% PLOTS
         # fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
@@ -453,6 +492,18 @@ for ii in range(0, 3):
         # plt.show()
         
 #%% PLOTS
+        # fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
+
+        # plt.plot(t/3600, pp)
+        # plt.ylabel(r'€/MWh')
+        # plt.xlabel(r'$t$ (h)')
+        # # plt.legend([r'$x = 1/4$', r'$x = 1/2$', r'$x = 3/4$', r'$x = 1$'])
+        # # plt.savefig('./Tf0_' + month[nM] + '_' + loc_ +'.eps',
+        # #             bbox_inches='tight', format='eps')
+        
+        # plt.show()   
+        
+#%% PLOTS
         fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
         
         ax1.plot(t/3600, Ts[:,-1]-273, '--')
@@ -498,3 +549,16 @@ with open('./EE_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EE,0))))
+    
+#%% ENERGY PRICE
+
+fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
+
+plt.plot(t/3600, pp[0], t/3600, pp[1], t/3600, pp[2])
+plt.ylabel(r'€/MWh')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'March', r'June', r'Dec.'])
+plt.savefig('./Energy_price.eps',
+            bbox_inches='tight', format='eps')
+
+plt.show() 

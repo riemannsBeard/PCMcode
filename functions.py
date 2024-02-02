@@ -705,9 +705,23 @@ def computeDish(G0, n):
                          dtype=float)
     
     # Interpolacion
-    Ib_june = Ad*np.interp(t, DNI_june[:,0], DNI_june[:,1])
     Ib_march = Ad*np.interp(t, DNI_march[:,0], DNI_march[:,1])
+    Ib_june = Ad*np.interp(t, DNI_june[:,0], DNI_june[:,1])
     Ib_dec = Ad*np.interp(t, DNI_dec[:,0], DNI_dec[:,1])
+    
+    
+    # # Price €/MWh
+    # march_pelec = np.loadtxt('./March_pelec.csv', delimiter=";",
+    #                        dtype=float)
+    # june_pelec = np.loadtxt('./June_pelec.csv', delimiter=";",
+    #                       dtype=float)
+    # dec_pelec = np.loadtxt('./Dec_pelec.csv', delimiter=";",
+    #                      dtype=float)
+    
+    # # Interpolacion
+    # p_march = np.interp(t, march_pelec[:,1], march_pelec[:,0])
+    # p_june = np.interp(t, june_pelec[:,1], june_pelec[:,0])
+    # p_dec = np.interp(t, june_pelec[:,1], june_pelec[:,0])
     
     
     #%% SOLAR DISH MODEL
