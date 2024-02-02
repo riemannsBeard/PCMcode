@@ -35,10 +35,10 @@ tf = 24
 dt = 0.5
 t = np.arange(0, tf + dt, dt)
 ts = t
-# G0 = 0.043/2
+G0 = 0.043/2
 
 loc = ['Cordoba', 'Malaga']
-loc_ = loc[1]
+loc_ = loc[0]
 
 
 # AMBIENT TEMPERATURE

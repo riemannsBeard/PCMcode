@@ -35,17 +35,17 @@ plt.rcParams['lines.markersize'] = 1
 
 #%% DISH STUFF
 
-fig, ax1 = plt.subplots()
-ax1.plot(t, Ib_march*1e-3, t, Ib_june*1e-3, t, Ib_dec*1e-3)
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
-ax1.set_xlabel(r'$t$ (h)')
-ax1.set_ylabel(r'$I_b$ (kW)')
+# fig, ax1 = plt.subplots()
+# ax1.plot(t, Ib_march*1e-3, t, Ib_june*1e-3, t, Ib_dec*1e-3)
+# plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+# ax1.set_xlabel(r'$t$ (h)')
+# ax1.set_ylabel(r'$I_b$ (kW)')
 
-fig, ax1 = plt.subplots()
-ax1.plot(t, Tamb_march - 273, t, Tamb_june - 273, t, Tamb_dec - 273)
-plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
-ax1.set_xlabel(r'$t$ (h)')
-ax1.set_ylabel(r'$T$ ($^\circ$C)')
+# fig, ax1 = plt.subplots()
+# ax1.plot(t, Tamb_march - 273, t, Tamb_june - 273, t, Tamb_dec - 273)
+# plt.legend([r'March', r'June', r'Dec.'], loc='upper left')
+# ax1.set_xlabel(r'$t$ (h)')
+# ax1.set_ylabel(r'$T$ ($^\circ$C)')
 
 
 #%% Graphite Cp
@@ -55,6 +55,9 @@ def cpG(T):
                  1.437e9/T**4)
 
 #%% PROBLEM
+
+L = 2 #1.25 #0.5 #2 #4.5
+D = 1 #L/2 #1.67*2 #3
 
 eps = 0.22 #0.22
 dx = 2.2e-2
@@ -83,21 +86,22 @@ ks = 120
 
 QQ = np.zeros((3, len(t)))
 EE = 0
+E = np.zeros(3)
 
 ##
 
-LL = np.arange(0.25, 2.25, 0.25)
-DD = np.arange(0.25, 2.25, 0.25)
+# LL = np.arange(0.25, 2.25, 0.25)
+# DD = np.arange(0.25, 2.25, 0.25)
 
 
-for kk in range(0, len(LL)):
-for jj in range(0, len(DD)):
+# for kk in range(0, len(LL)):
+# for jj in range(0, len(DD)):
 
 
 for ii in range(0, 3):
 
-        L = LL[kk] #1.25 #0.5 #2 #4.5
-        D = DD[JJ] #L/2 #1.67*2 #3
+        # L = 1 #1.25 #0.5 #2 #4.5
+        # D = 1 #L/2 #1.67*2 #3
 
         # eps = 0.22 #0.22
         # dx = 2.2e-2
@@ -122,7 +126,7 @@ for ii in range(0, 3):
         # rhos = 1800
         # ks = 120
         
-        #Tin = 100 + 273
+        # # Tin = 100 + 273
         nM = ii
         
         Tin = np.interp(t, ts*3600, To[nM,:])
@@ -272,7 +276,7 @@ for ii in range(0, 3):
             if Tin[i] >= Tref:
     
                 Tf0[i] = np.maximum(Tref, Tf[i,-1])
-                QQ[ii,i] = mDot*cp*(Tref - Tf0[ii,i])
+                QQ[ii,i] = mDot*cp*(Tref - Tf0[i])
                 
                 if QQ[ii,i] < 0:
                     QQ[ii,i] = 0
@@ -303,15 +307,15 @@ for ii in range(0, 3):
 #%% Energy
         
         # E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
-        E[i] = np.trapz(QQ[ii,:]/1e3, t/3600)
+        E[ii] = np.trapz(QQ[ii,:]/1e3, t/3600)
         
         
-        display('E = ' + str(E[i]) + ' kWh')
+        display('E = ' + str(E[ii]) + ' kWh')
         
         with open('./E_' + month[nM] + '_' + loc_ +
                     '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
-            archivo.write(str(E[i]))
+            archivo.write(str(E[ii]))
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -419,8 +423,8 @@ for ii in range(0, 3):
         QQtheo = mDot*cpr.PropsSI('C', 'T', 0.5*(T00 + Tref),
                                   'P', 5e5, 'Air')*(Tref - T00)
         
-        plt.plot(t/3600, QQ/1e3)
-        plt.plot(t/3600, QQ*0 + QQtheo/1e3, 'k--')
+        plt.plot(t/3600, QQ[ii,:]/1e3)
+        plt.plot(t/3600, QQ[ii,:]*0 + QQtheo/1e3, 'k--')
         
         plt.ylabel(r'$\dot{Q}_0$ (kW)')
         plt.xlabel(r'$t$ (h)')
@@ -442,12 +446,14 @@ for ii in range(0, 3):
 #%% PLOTS
         fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
         
-        ax1.plot(t/3600, Tf[:,-1]-273, t/3600, Tin-273,
+        ax1.plot(t/3600, Ts[:,-1]-273, '--')
+        ax1.set_prop_cycle(None)
+        ax1.plot(t/3600, Ts[:,-1]-273, t/3600, Tin-273,
                  t/3600, Tf0-273, 'k-')
         ax1.plot(0, T00-273, 'ro', markersize = 3)
-        ax1.set_ylabel(r'$T_f$ ($^\circ$C)')
+        ax1.set_ylabel(r'$T$ ($^\circ$C)')
         ax1.set_xlabel(r'$t$ (h)')
-        ax1.set_ylim([195, 1055]) 
+        ax1.set_ylim([195, 1055])
         
         
         # qarr = (Tref - Tf[:,-1])*mDot*cpr.PropsSI('C', 'T', (0.5*(Tref - Tf[:,-1])),
@@ -455,8 +461,8 @@ for ii in range(0, 3):
         
         ax2 = ax1.twinx()
         color = 'tab:green'
-        ax2.plot(t[1:]/3600, QQ[1:]/1e3, color=color)
-        ax2.plot(t[1:-1:500]/3600, QQ[1:-1:500]*0 + 27,
+        ax2.plot(t[1:]/3600, QQ[ii,1:]/1e3, color=color)
+        ax2.plot(t[1:-1:500]/3600, QQ[ii,1:-1:500]*0 + 27,
                  'o-', markersize = 2, color=color)
         
         # ax2.plot(t[0:-1:500]/3600, qarr[0:-1:500]/1000, 's-',
@@ -475,5 +481,11 @@ for ii in range(0, 3):
         
 #%% TOTAL ENERGY
 
-EE += E[i]
+EE = 0.25*(2*E[0] + E[1] + E[2])
 
+display('EE = ' + str(EE) + ' kWh')
+
+with open('./EE_' + month[nM] + '_' + loc_ +
+            '_T0_' + str(T00 - 273), 'w') as archivo:
+# Escribir el resultado en el archivo
+    archivo.write(str(EE))
