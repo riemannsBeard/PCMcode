@@ -14,7 +14,7 @@ import matplotlib_inline
 import warnings
 
 from functions import *
-from dishLib import *
+# from dishLib import *
 
 warnings.filterwarnings('ignore')
 # matplotlib_inline.backend_inline.set_matplotlib_formats('svg', 'pdf')
@@ -56,7 +56,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 2 #1.25 #0.5 #2 #4.5
+L = 1 #1.25 #0.5 #2 #4.5
 D = 1 #L/2 #1.67*2 #3
 
 eps = 0.22 #0.22
@@ -89,6 +89,15 @@ EE = 0
 E = np.zeros(3)
 
 ##
+
+
+G0 = 0.043
+N = 2
+
+To, ts, month, loc_ = computeDish(G0/N, 0)
+
+##
+
 
 # LL = np.arange(0.25, 2.25, 0.25)
 # DD = np.arange(0.25, 2.25, 0.25)
@@ -312,10 +321,10 @@ for ii in range(0, 3):
         
         display('E = ' + str(E[ii]) + ' kWh')
         
-        with open('./E_' + month[nM] + '_' + loc_ +
-                    '_T0_' + str(T00 - 273), 'w') as archivo:
+        with open('./E_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+                  month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
-            archivo.write(str(E[ii]))
+            archivo.write(str(int(np.round(E[ii],0))))
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -473,8 +482,8 @@ for ii in range(0, 3):
         ax2.spines['right'].set_color(color)
         ax2.set_ylabel(r'$\dot{Q}_0$ (kW)', color=color)
         ax2.set_ylim([-1, 28]) 
-        plt.savefig('./Q0_Tf_' + month[nM] + '_' + loc_ +
-                    '_T0_' + str(T00 - 273) +'.eps', bbox_inches='tight',
+        plt.savefig('./Q0_Tf_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+                  month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273) +'.eps', bbox_inches='tight',
                     format='eps')
         
         plt.show()
@@ -485,7 +494,7 @@ EE = 0.25*(2*E[0] + E[1] + E[2])
 
 display('EE = ' + str(EE) + ' kWh')
 
-with open('./EE_' + month[nM] + '_' + loc_ +
-            '_T0_' + str(T00 - 273), 'w') as archivo:
+with open('./EE_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
-    archivo.write(str(EE))
+    archivo.write(str(int(np.round(EE,0))))
