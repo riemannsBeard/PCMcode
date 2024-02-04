@@ -90,8 +90,13 @@ QQ = np.zeros((3, len(t)))
 pp = np.zeros((3, len(t)))
 EE = 0
 E = np.zeros(3)
-price = np.zeros(3)
 
+price = np.zeros((3, len(t)))
+priceTheo = np.zeros((3, len(t)))
+priceDay = np.zeros(3)
+priceTheoDay = np.zeros(3)
+priceCumDay = np.zeros((3, len(t)))
+priceTheoCumDay = np.zeros((3, len(t)))
 ##
 
 
@@ -357,15 +362,25 @@ for ii in range(0, 3):
 #%% Price
         
         # E = np.trapz(np.sum(qv[1:,:]*volR/1e3, axis=1), t[1:]/3600)
-        price[ii] = np.trapz(QQ[ii,:]/1e6*pp[ii,:], t/3600)
+        priceDay[ii] = np.trapz(QQ[ii,:]/1e6*pp[ii,:], t/3600)
+        priceTheoDay[ii] = np.trapz(QQ[ii,:]*0 + 27000/1e6*pp[ii,:], t/3600)
         
-        
-        display('price = ' + str(price[ii]) + ' €')
+        price[ii,:] = QQ[ii,:]/1e6*pp[ii,:]
+        priceTheo[ii,:] = QQ[ii,:]*0 + 27000/1e6*pp[ii,:]
+
+        priceCumDay[ii,:] = cumtrapz(QQ[ii,:]/1e6*pp[ii,:], t/3600,
+                                  initial = QQ[ii,0]/1e6*pp[ii,0])
+        priceTheoCumDay[ii,:] = cumtrapz(QQ[ii,:]*0 + 27000/1e6*pp[ii,:], t/3600,
+                                      initial = QQ[ii,0]*0 + 27000/1e6*pp[ii,0]) 
+       
+        display('price/day = ' + str(priceDay[ii]) + ' €')
+        display('priceTheo/day = ' + str(priceTheoDay[ii]) + ' €')
         
         with open('./pp_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
                   month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
-            archivo.write(str(int(np.round(price[ii],0))))
+            archivo.write('precio = ' + str(int(np.round(priceDay[ii],0))) + '\n')
+            archivo.write('precio teo = ' + str(int(np.round(priceTheoDay[ii],0))))
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -561,4 +576,32 @@ plt.legend([r'March', r'June', r'Dec.'])
 plt.savefig('./Energy_price.eps',
             bbox_inches='tight', format='eps')
 
-plt.show() 
+plt.show()
+
+
+#%% PLOTS
+fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
+
+ax1.plot(t/3600, priceCumDay.T, '-')
+ax1.set_prop_cycle(None)
+ax1.plot(t/3600, priceTheoCumDay.T, '--')
+plt.ylabel(r'€')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'March', r'June', r'Dec.'])
+
+plt.show()
+
+
+#%% PLOTS
+fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
+
+ax1.plot(t/3600, price.T, '-')
+ax1.set_prop_cycle(None)
+ax1.plot(t/3600, priceTheo.T, '--')
+plt.ylabel(r'€/h')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'March', r'June', r'Dec.'])
+
+plt.show()
+
+
