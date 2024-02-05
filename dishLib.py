@@ -19,13 +19,15 @@ from functions import *
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ["Computer Modern Roman"]
-plt.rcParams['legend.fontsize'] = 12
-plt.rcParams['axes.labelsize'] = 16
-plt.rcParams['axes.titlesize'] = 16
-plt.rcParams['figure.titlesize'] = 16
-plt.rcParams['xtick.labelsize'] = 12
-plt.rcParams['ytick.labelsize'] = 12
-plt.rcParams['lines.markersize'] = 3
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['axes.labelsize'] = 11
+plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['figure.titlesize'] = 12
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
+plt.rcParams['lines.markersize'] = 1
+
+cm = 1/2.54 
 
 
 #%% LOAD DATA
@@ -38,7 +40,7 @@ ts = t
 G0 = 0.043/2
 
 loc = ['Cordoba', 'Malaga']
-loc_ = loc[0]
+loc_ = loc[1]
 
 
 # AMBIENT TEMPERATURE
@@ -159,14 +161,15 @@ for j in range(0, 3):
     
     #%% PLOTS
     
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
     ax1.plot(t, (Tambs[j] - 273), t, To[j,:]/10, t, Tf/10, t, Ibs[j]/1e3, 'k-')
     plt.legend([r'$T_a$ ($^\circ$C)',  r'$T_o/10$ ($^\circ$C)', r'$T_f/10$ ($^\circ$C)',
                 r'$I_b$ (kW)'], loc='upper left')
     ax1.set_xlabel(r'$t$ (h)')
-    ax1.set_ylim([-5, 85])
+    ax1.set_ylim([-5, 200])
+    ax1.set_yticks(np.linspace(0, ax1.get_ybound()[1], 5))
     ax1.set_title(month[j])
-    # ax1.set_ylim([-5, 105])
+    ax1.set_box_aspect(1)
     
     
     ax2 = ax1.twinx()
@@ -174,11 +177,14 @@ for j in range(0, 3):
     ax2.plot(t, eta*100, color=color)
     ax2.set_ylabel(r'$\eta$ (\%)', color=color)  # we already handled the x-label with ax1
     ax2.tick_params(axis='y', labelcolor=color)
-    ax2.set_ylim([-5, 105])
+    ax2.set_ylim([-2.5, 100])
+    ax2.set_yticks(np.linspace(0, ax2.get_ybound()[1], 5))
     ax2.set_title(month[j])
-    
+    ax2.set_box_aspect(1)
+
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.savefig('./' + loc_+ '_' + str(month[j]) + '.eps', bbox_inches='tight',
+    plt.savefig('./' + loc_+ '_' + str(month[j]) + '_N_' + str(0.043/G0) +
+                '.eps', bbox_inches='tight',
                 format='eps')
     plt.show()
 

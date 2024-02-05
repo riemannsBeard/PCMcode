@@ -58,7 +58,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 1 #1.25 #0.5 #2 #4.5
+L = 1.0 #1.25 #0.5 #2 #4.5
 D = 1 #L/2 #1.67*2 #3
 
 eps = 0.22 #0.22
@@ -101,9 +101,9 @@ priceTheoCumDay = np.zeros((3, len(t)))
 
 
 G0 = 0.043
-N = 2
+N = 4
 
-To, ts, month, loc_ = computeDish(G0/N, 0)
+To, ts, month, loc_ = computeDish(G0/N, 1)
 
 ##
 
@@ -368,10 +368,15 @@ for ii in range(0, 3):
         price[ii,:] = QQ[ii,:]/1e6*pp[ii,:]
         priceTheo[ii,:] = QQ[ii,:]*0 + 27000/1e6*pp[ii,:]
 
+        # priceCumDay[ii,:] = cumtrapz(QQ[ii,:]/1e6*pp[ii,:], t/3600,
+        #                           initial = QQ[ii,0]/1e6*pp[ii,0])
+        # priceTheoCumDay[ii,:] = cumtrapz(QQ[ii,:]*0 + 27000/1e6*pp[ii,:], t/3600,
+        #                               initial = QQ[ii,0]*0 + 27000/1e6*pp[ii,0]) 
+       
         priceCumDay[ii,:] = cumtrapz(QQ[ii,:]/1e6*pp[ii,:], t/3600,
-                                  initial = QQ[ii,0]/1e6*pp[ii,0])
+                                  initial = 0)
         priceTheoCumDay[ii,:] = cumtrapz(QQ[ii,:]*0 + 27000/1e6*pp[ii,:], t/3600,
-                                      initial = QQ[ii,0]*0 + 27000/1e6*pp[ii,0]) 
+                                      initial = 0) 
        
         display('price/day = ' + str(priceDay[ii]) + ' €')
         display('priceTheo/day = ' + str(priceTheoDay[ii]) + ' €')
@@ -573,7 +578,7 @@ plt.plot(t/3600, pp[0], t/3600, pp[1], t/3600, pp[2])
 plt.ylabel(r'€/MWh')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'March', r'June', r'Dec.'])
-plt.savefig('./Energy_price.eps',
+plt.savefig('./Market_energy_price.eps',
             bbox_inches='tight', format='eps')
 
 plt.show()
@@ -588,7 +593,9 @@ ax1.plot(t/3600, priceTheoCumDay.T, '--')
 plt.ylabel(r'€')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'March', r'June', r'Dec.'])
-
+plt.savefig('./Comp_cum_energy_price' + '_LbyD_' + str(L/D) + '_' + loc_ +
+            '_N_' + str(int(N)) + '.eps',
+            bbox_inches='tight', format='eps')
 plt.show()
 
 
@@ -601,7 +608,9 @@ ax1.plot(t/3600, priceTheo.T, '--')
 plt.ylabel(r'€/h')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'March', r'June', r'Dec.'])
-
+plt.savefig('./Comp_inst_energy_price' + '_LbyD_' + str(L/D) + '_' + loc_ +
+            '_N_' + str(int(N)) + '.eps',
+            bbox_inches='tight', format='eps')
 plt.show()
 
 
