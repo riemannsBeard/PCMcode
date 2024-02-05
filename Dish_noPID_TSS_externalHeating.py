@@ -58,7 +58,7 @@ def cpG(T):
 
 #%% PROBLEM
 
-L = 1.0 #1.25 #0.5 #2 #4.5
+L = 1.5 #1.25 #0.5 #2 #4.5
 D = 1 #L/2 #1.67*2 #3
 
 eps = 0.22 #0.22
@@ -103,7 +103,7 @@ priceTheoCumDay = np.zeros((3, len(t)))
 G0 = 0.043
 N = 4
 
-To, ts, month, loc_ = computeDish(G0/N, 1)
+To, ts, month, loc_ = computeDish(G0/N, 0)
 
 ##
 
@@ -401,34 +401,34 @@ for ii in range(0, 3):
             
 #%% PLOTS
         
-        fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
+        # fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
         
-        cs1 = ax.contourf(x, t/3600, Tf-273, 32)
-        plt.tight_layout()
-        cbar1 = plt.colorbar(cs1)
-        cbar1.set_label(r'$T_f$ ($^\circ$C)', fontsize=16)
-        ax.set_ylabel(r'$t$ (h)')
-        ax.set_xlabel(r'$L$ (m)')
-        ax.set_box_aspect(1)
-        plt.savefig('./TfContour_' + month[nM] + '_' + loc_ +'.eps',
-                    bbox_inches='tight', format='eps')
-        plt.show()
+        # cs1 = ax.contourf(x, t/3600, Tf-273, 32)
+        # plt.tight_layout()
+        # cbar1 = plt.colorbar(cs1)
+        # cbar1.set_label(r'$T_f$ ($^\circ$C)', fontsize=16)
+        # ax.set_ylabel(r'$t$ (h)')
+        # ax.set_xlabel(r'$L$ (m)')
+        # ax.set_box_aspect(1)
+        # plt.savefig('./TfContour_' + month[nM] + '_' + loc_ +'.eps',
+        #             bbox_inches='tight', format='eps')
+        # plt.show()
         
 #%% PLOTS
         
-        fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
+        # fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
         
-        cs1 = ax.contourf(x, t/3600, Ts-273, 32)
-        plt.tight_layout()
-        cbar1 = plt.colorbar(cs1)
-        cbar1.set_label(r'$T_s$ ($^\circ$C)', fontsize=16)
-        ax.set_ylabel(r'$t$ (h)')
-        ax.set_xlabel(r'$L$ (m)')
-        ax.set_box_aspect(1)
-        plt.savefig('./TsContour_' + month[nM] + '_' + loc_ +'.eps',
-                    bbox_inches='tight', format='eps')
+        # cs1 = ax.contourf(x, t/3600, Ts-273, 32)
+        # plt.tight_layout()
+        # cbar1 = plt.colorbar(cs1)
+        # cbar1.set_label(r'$T_s$ ($^\circ$C)', fontsize=16)
+        # ax.set_ylabel(r'$t$ (h)')
+        # ax.set_xlabel(r'$L$ (m)')
+        # ax.set_box_aspect(1)
+        # plt.savefig('./TsContour_' + month[nM] + '_' + loc_ +'.eps',
+        #             bbox_inches='tight', format='eps')
         
-        plt.show()
+        # plt.show()
         
         #%% PLOTS
         # fig, ax = plt.subplots(figsize=(7*cm, 7*cm))
@@ -526,15 +526,16 @@ for ii in range(0, 3):
 #%% PLOTS
         fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
         
-        ax1.plot(t/3600, Ts[:,-1]-273, '--')
-        ax1.set_prop_cycle(None)
-        ax1.plot(t/3600, Ts[:,-1]-273, t/3600, Tin-273,
+        ax1.plot(t/3600, Tf[:,-1]-273, t/3600, Tin-273,
                  t/3600, Tf0-273, 'k-')
         ax1.plot(0, T00-273, 'ro', markersize = 3)
         ax1.set_ylabel(r'$T$ ($^\circ$C)')
         ax1.set_xlabel(r'$t$ (h)')
-        ax1.set_ylim([195, 1055])
-        
+        ax1.set_ylim([200, 2000])
+        ax1.set_yticks(np.linspace(200, 2000, 7))
+        if nM == 2:
+            ax1.set_ylim([200, 1000])
+            ax1.set_yticks(np.linspace(200, 1000, 5))
         
         # qarr = (Tref - Tf[:,-1])*mDot*cpr.PropsSI('C', 'T', (0.5*(Tref - Tf[:,-1])),
         #                                           'P', 5e5, 'Air')
