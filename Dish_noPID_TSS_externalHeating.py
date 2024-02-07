@@ -101,7 +101,7 @@ priceTheoCumDay = np.zeros((3, len(t)))
 
 
 G0 = 0.043
-N = 4
+N = 2
 
 To, ts, month, loc_ = computeDish(G0/N, 0)
 
@@ -168,6 +168,7 @@ for ii in range(0, 3):
         # ks = 120
         
         # # Tin = 100 + 273
+        
         nM = ii
         
         Tin = np.interp(t, ts*3600, To[nM,:])
@@ -315,6 +316,8 @@ for ii in range(0, 3):
 
             
             if Tin[i] >= Tref:
+                
+                # TSS charge
     
                 Tf0[i] = np.maximum(Tref, Tf[i,-1])
                 QQ[ii,i] = mDot*cp*(Tref - Tf0[i])
@@ -566,7 +569,7 @@ EE = 0.25*(2*E[0] + E[1] + E[2])
 
 display('EE = ' + str(EE) + ' kWh')
 
-with open('./EE_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+with open('./Emean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EE,0))))
