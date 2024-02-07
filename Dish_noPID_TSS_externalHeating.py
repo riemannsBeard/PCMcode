@@ -86,17 +86,25 @@ ks = 120
 
 ##
 
+em = np.zeros((3, len(t)))
+emSolar = np.zeros((3, len(t)))
+
 QQ = np.zeros((3, len(t)))
 QQsolar = np.zeros((3, len(t)))
 
 pp = np.zeros((3, len(t)))
 ppSolar = np.zeros((3, len(t)))
 
+CO2 = np.zeros(3)
+CO2Solar = np.zeros(3)
+
 EE = 0
 EEsolar = 0
 
 E = np.zeros(3)
 Esolar = np.zeros(3)
+CO2Theo = np.zeros(3)
+
 
 charge = np.zeros((3, len(t)))
 
@@ -141,6 +149,22 @@ dec_pelec = np.vstack([dec_pelec, [67., 24.]])
 pp[0,:] = np.interp(t/3600, march_pelec[:,1], march_pelec[:,0])
 pp[1,:] = np.interp(t/3600, june_pelec[:,1], june_pelec[:,0])
 pp[2,:] = np.interp(t/3600, dec_pelec[:,1], dec_pelec[:,0])
+
+
+#%% EMISIONS
+
+# eq CO2 kg/MWh
+march_em = np.loadtxt('./March_em.csv', delimiter=";",
+                       dtype=float)
+june_em = np.loadtxt('./June_em.csv', delimiter=";",
+                      dtype=float)
+dec_em = np.loadtxt('./Dec_em.csv', delimiter=";",
+                     dtype=float)
+
+# Interpolacion
+em[0,:] = np.interp(t/3600, march_em[:,0], march_em[:,1])
+em[1,:] = np.interp(t/3600, june_em[:,0], june_em[:,1])
+em[2,:] = np.interp(t/3600, dec_em[:,0], dec_em[:,1])
 
 
 #%% MONTHS LOOP
@@ -580,7 +604,8 @@ for ii in range(0, 3):
 
                     
 
-            elif Tin[i] < Tref and Tin[i] < Tf[i-1,-1] and Tf[i-1,-1] < Tref:
+            elif Tin[i] < Tref and Tin[i] < Tf[i-1,-1] and Tf[i-1,-1] < Tref \
+                and Tf[i-1,-1] <= 500:
                 
                 # Bypass
                 # ODE solution -- TES
@@ -645,6 +670,78 @@ for ii in range(0, 3):
                 
                 Tf0[i] = Tref
                 QQ[ii,i] = mDot*cp*(Tref - Tin[i])
+                
+                
+            elif Tin[i] < Tref and Tin[i] < Tf[i-1,-1] and Tf[i-1,-1] < Tref \
+                and Tf[i-1,-1] > 500:
+                
+                # OJO: Discharge
+                charge[ii,i] = -1
+                
+                # ODE solution -- TES
+                   
+                # --------------------------------------------------------------- #
+                # --------------------------------------------------------------- #
+                # --------------------------------------------------------------- #
+                
+                # TES TANK -- fluid properties changing with temperature
+                
+                # Air density at 5 bar
+                rhof = cpr.PropsSI('D', 'T', 0.5*(Tref + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', 0.5*(Tref + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', 0.5*(Tref + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', 0.5*(Tref + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                
+                alpha = eps*rhof*cp
+                beta = eps*kair
+                
+                gamma = (1-eps)*rhos*cpG(np.mean(Ts[i-1,:]))
+                betas = ks*(1 - eps)
+            
+                u = 4*mDot/(rhof*eps*np.pi*D**2)
+            
+                Rep = rhof*d*u/mu
+                Pr = cp*mu/kair
+                Nu = 0.664*Rep**0.5*Pr**0.5
+                a = Nu*kair/d
+                h = 6*(1-eps)*beta*(2 + 1.1*Rep**(0.6)*Pr**(1/3))/(d**2)
+            
+                p = dt*u/dx
+                q = 2*beta/alpha*0.5*dt/(dx**2)
+                r = h*dt/alpha
+            
+                rs = dt*h/gamma
+                qs = 2*betas*0.5*dt/(gamma*dx**2)
+                
+                
+                diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
+                             np.ones(Nx)*(-p-q)]
+                offsets = [0, 1, -1]
+                A.setdiag(diagonals[0], offsets[0])
+                A.setdiag(diagonals[1], offsets[1])
+                A.setdiag(diagonals[2], offsets[2])
+                A[-1,-2] = -2*q - p
+                
+                diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
+                             np.ones(Nx + 1)*(-qs)]
+                offsets = [0, 1, -1]
+                As.setdiag(diagonals[0], offsets[0])
+                As.setdiag(diagonals[1], offsets[1])
+                As.setdiag(diagonals[2], offsets[2])
+                As[-1,-2] = -2*qs
+                As[0,1] = -2*qs  
+                    
+                # PDE solution -- TANK
+                
+                bc1[0] = Tin[i] #Tf[i-1,0]
+                
+                Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
+                Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
+                            r*Ts[i-1,1:])
+                
+                    
+                Tf0[i] = Tref
+                QQ[ii,i] = mDot*cp*(Tref - Tf[i-1,-1])
                     
 
             elif Tin[i] < Tref and Tin[i] < Tf[i-1,-1] and Tf[i-1,-1] >= Tref:
@@ -716,6 +813,7 @@ for ii in range(0, 3):
                     
                 Tf0[i] = Tf[i-1,-1]
                 QQ[ii,i] = 0
+                
                     
             # Extra power without TSS (only solar dish)   
                 
@@ -754,6 +852,11 @@ for ii in range(0, 3):
         priceTheoDay[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
                                     (Tref - 500)*1e-6*pp[ii,:], t/3600)
         
+        CO2[ii] = np.trapz(QQ[ii,:]/1e6*em[ii,:], t/3600)
+        CO2Solar[ii] = np.trapz(QQsolar[ii,:]/1e6*em[ii,:], t/3600)
+        CO2Theo[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
+                                    (Tref - 500)/1e6*em[ii,:], t/3600)
+        
         price[ii,:] = QQ[ii,:]/1e6*pp[ii,:]
         priceSolar[ii,:] = QQsolar[ii,:]/1e6*pp[ii,:]
         priceTheo[ii,:] = QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*\
@@ -777,6 +880,18 @@ for ii in range(0, 3):
             archivo.write('precio = ' + str(int(np.round(priceDay[ii],0))) + '\n')
             archivo.write('precio solar = ' + str(int(np.round(priceDaySolar[ii],0))) + '\n')
             archivo.write('precio teo = ' + str(int(np.round(priceTheoDay[ii],0))))
+            
+            
+        display('CO2/day = ' + str(CO2[ii]) + ' eq. T')
+        display('solar CO2/day = ' + str(CO2Solar[ii]) + ' eq. T')
+        display('CO2 theo/day = ' + str(CO2Theo[ii]) + ' eq. T')
+       
+        with open('./pp_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+                  month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+        # Escribir el resultado en el archivo
+            archivo.write('T eq. CO2 = ' + str(int(np.round(CO2[ii],0))) + '\n')
+            archivo.write('T eq. CO2 solar = ' + str(int(np.round(CO2Solar[ii],0))) + '\n')
+            archivo.write('T eq. CO2 teo = ' + str(int(np.round(CO2Theo[ii],0))))
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -961,27 +1076,42 @@ for ii in range(0, 3):
         
         plt.show()
         
-#%% TOTAL ENERGY
+#%% MEAN ENERGY & CO2 EMISSIOS
 
 EE = 0.25*(2*E[0] + E[1] + E[2])
+CO2tot = 0.25*(2*CO2[0] + CO2[1] + CO2[2])
 
 display('EE = ' + str(EE) + ' kWh')
+display('CO2tot = ' + str(CO2tot) + ' eq. T')
 
 with open('./Emean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EE,0))))
+
+with open('./CO2mean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+# Escribir el resultado en el archivo
+    archivo.write(str(int(np.round(CO2tot,0))))
     
-#%% SOLAR ENERGY
+#%% SOLAR ENERGY & EMISSIONS
 
 EEsolar = 0.25*(2*Esolar[0] + Esolar[1] + Esolar[2])
+CO2totSolar = 0.25*(2*CO2Solar[0] + CO2Solar[1] + CO2Solar[2])
 
 display('EEsolar = ' + str(EEsolar) + ' kWh')
+display('CO2totSolar = ' + str(CO2totSolar) + ' eq. T')
+
 
 with open('./EmeanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EEsolar,0))))
+    
+with open('./CO2meanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+# Escribir el resultado en el archivo
+    archivo.write(str(int(np.round(CO2totSolar,0))))
     
 #%% ENERGY PRICE
 
