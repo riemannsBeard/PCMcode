@@ -56,10 +56,18 @@ def cpG(T):
     return 4184*(0.54 + 9.11e-6*T - 90.27/T - 43449.3/T**2 + 1.593e7/T**3 -\
                  1.437e9/T**4)
 
-#%% PROBLEM
+#%% CASE
 
-L = 2 #1.25 #0.5 #2 #4.5
+# Case
+L = 1.5 #1.25 #0.5 #2 #4.5
 D = 1 #L/2 #1.67*2 #3
+
+N = 4
+loc = 0
+
+G0 = 0.043
+
+#%% DATA
 
 eps = 0.22 #0.22
 dx = 2.2e-2
@@ -120,15 +128,10 @@ priceTheoCumDay = np.zeros((3, len(t)))
 priceCumDay = np.zeros((3, len(t)))
 priceCumDaySolar = np.zeros((3, len(t)))
 
-##
 
+#%% SOLVE FOR DISH
 
-G0 = 0.043
-N = 1
-
-To, ts, month, loc_ = computeDish(G0/N, 1)
-
-##
+To, ts, month, loc_ = computeDish(G0/N, loc)
 
 #%% ENERGY PRICE
 
@@ -228,13 +231,23 @@ for ii in range(0, 3):
         rs = dt*h/gamma
         qs = 2*betas*0.5*dt/(gamma*dx**2)
                 
-        # Fluid
+        # Fluid - dirichlet
         diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q), np.ones(Nx)*(-p-q)]
         offsets = [0, 1, -1]
         A = sp.sparse.diags(diagonals, offsets).toarray()
         A[-1,-2] = -2*q - p
         
         A = sp.sparse.csr_matrix(A)
+        
+        
+        # Fluid - neumann
+        diagonals = [np.ones(Nx + 1)*(1 + 2*q + r + p), np.ones(Nx)*(-q), np.ones(Nx + 1)*(-p-q)]
+        offsets = [0, 1, -1]
+        An = sp.sparse.diags(diagonals, offsets).toarray()
+        An[-1,-2] = -2*q - p
+        An[0,1] = -2*q
+        
+        An = sp.sparse.csr_matrix(An)
         
         
         # Solid
@@ -272,10 +285,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -323,12 +336,7 @@ for ii in range(0, 3):
                 Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
                 Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                             r*Ts[i-1,1:])
-                    
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
+
                     
                 if Tf[i,-1] >= Tref:
                     Tf0[i] = Tf[i,-1]
@@ -353,10 +361,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -380,14 +388,14 @@ for ii in range(0, 3):
                 qs = 2*betas*0.5*dt/(gamma*dx**2)
                 
                 
-                diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
-                             np.ones(Nx)*(-p-q)]
+                diagonals = [np.ones(Nx + 1)*(1 + 2*q + r + p), np.ones(Nx + 1)*(-q),
+                             np.ones(Nx + 1)*(-p-q)]
                 offsets = [0, 1, -1]
-                A.setdiag(diagonals[0], offsets[0])
-                A.setdiag(diagonals[1], offsets[1])
-                A.setdiag(diagonals[2], offsets[2])
-                A[-1,-2] = -2*q
-                As[0,1] = -2*q
+                An.setdiag(diagonals[0], offsets[0])
+                An.setdiag(diagonals[1], offsets[1])
+                An.setdiag(diagonals[2], offsets[2])
+                An[-1,-2] = -2*q
+                An[0,1] = -2*q
                 
                 diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
                              np.ones(Nx + 1)*(-qs)]
@@ -401,15 +409,8 @@ for ii in range(0, 3):
                 # PDE solution -- TANK
                                 
                 Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
-                Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + \
-                            r*Ts[i-1,1:])
-                    
-                    
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
+                Tf[i,:] = sp.sparse.linalg.spsolve(An, Tf[i-1,:] + \
+                            r*Ts[i-1,:])
     
                 
                 Tf0[i] = Tin[i]
@@ -424,6 +425,7 @@ for ii in range(0, 3):
             elif (Tin[i] < Tref) and (Tin[i] >= Tf[i-1,-1]):
                 
                 # Bypass
+                
                 # ODE solution -- TES
                    
                 # --------------------------------------------------------------- #
@@ -433,10 +435,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -460,14 +462,14 @@ for ii in range(0, 3):
                 qs = 2*betas*0.5*dt/(gamma*dx**2)
                 
                 
-                diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
-                             np.ones(Nx)*(-p-q)]
+                diagonals = [np.ones(Nx + 1)*(1 + 2*q + r + p), np.ones(Nx + 1)*(-q),
+                             np.ones(Nx + 1)*(-p-q)]
                 offsets = [0, 1, -1]
-                A.setdiag(diagonals[0], offsets[0])
-                A.setdiag(diagonals[1], offsets[1])
-                A.setdiag(diagonals[2], offsets[2])
-                A[-1,-2] = -2*q
-                As[0,1] = -2*q
+                An.setdiag(diagonals[0], offsets[0])
+                An.setdiag(diagonals[1], offsets[1])
+                An.setdiag(diagonals[2], offsets[2])
+                An[-1,-2] = -2*q
+                An[0,1] = -2*q
                 
                 diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
                              np.ones(Nx + 1)*(-qs)]
@@ -481,14 +483,9 @@ for ii in range(0, 3):
                 # PDE solution -- TANK
                                 
                 Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
-                Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + \
-                            r*Ts[i-1,1:])
-                    
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
+                Tf[i,:] = sp.sparse.linalg.spsolve(An, Tf[i-1,:] + \
+                            r*Ts[i-1,:])
+
                 
                 Tf0[i] = Tref
                 QQ[ii,i] = mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + Tin[i]),
@@ -499,6 +496,7 @@ for ii in range(0, 3):
                 and (Tf[i-1,-1] <= 510):
                 
                 # Bypass
+                
                 # ODE solution -- TES
                    
                 # --------------------------------------------------------------- #
@@ -508,10 +506,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', Tf[i-1,-1], 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -535,14 +533,14 @@ for ii in range(0, 3):
                 qs = 2*betas*0.5*dt/(gamma*dx**2)
                 
                 
-                diagonals = [np.ones(Nx)*(1 + 2*q + r + p), np.ones(Nx)*(-q),
-                             np.ones(Nx)*(-p-q)]
+                diagonals = [np.ones(Nx + 1)*(1 + 2*q + r + p), np.ones(Nx + 1)*(-q),
+                             np.ones(Nx + 1)*(-p-q)]
                 offsets = [0, 1, -1]
-                A.setdiag(diagonals[0], offsets[0])
-                A.setdiag(diagonals[1], offsets[1])
-                A.setdiag(diagonals[2], offsets[2])
-                A[-1,-2] = -2*q
-                As[0,1] = -2*q
+                An.setdiag(diagonals[0], offsets[0])
+                An.setdiag(diagonals[1], offsets[1])
+                An.setdiag(diagonals[2], offsets[2])
+                An[-1,-2] = -2*q
+                An[0,1] = -2*q
                 
                 diagonals = [np.ones(Nx + 1)*(1 + 2*qs + rs), np.ones(Nx + 1)*(-qs),
                              np.ones(Nx + 1)*(-qs)]
@@ -556,14 +554,8 @@ for ii in range(0, 3):
                 # PDE solution -- TANK
                                 
                 Ts[i,:] = sp.sparse.linalg.spsolve(As, Ts[i-1,:] + rs*Tf[i-1,:])
-                Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + \
-                            r*Ts[i-1,1:])
-                                        
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
+                Tf[i,:] = sp.sparse.linalg.spsolve(An, Tf[i-1,:] + \
+                            r*Ts[i-1,:])
                 
                 
                 Tf0[i] = Tref
@@ -589,10 +581,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', 0.5*(Tin[i] + Tf[i-1,-1]), 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -641,12 +633,6 @@ for ii in range(0, 3):
                 Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                             r*Ts[i-1,1:])
                     
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
-                
                     
                 Tf0[i] = Tref
                 QQ[ii,i] = mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + Tf[i-1,-1]),
@@ -667,10 +653,10 @@ for ii in range(0, 3):
                 # TES TANK -- fluid properties changing with temperature
                 
                 # Air density at 5 bar
-                rhof = cpr.PropsSI('D', 'T', 0.5*(Tf[i-1,1:] + Tin[i]), 'P', 5e5, 'Air')
-                cp = cpr.PropsSI('C', 'T', 0.5*(Tf[i-1,1:] + Tin[i]), 'P', 5e5, 'Air')
-                kair = cpr.PropsSI('L', 'T', 0.5*(Tf[i-1,1:] + Tin[i]), 'P', 5e5, 'Air')
-                mu = cpr.PropsSI('V', 'T', 0.5*(Tf[i-1,1:] + Tin[i]), 'P', 5e5, 'Air')
+                rhof = cpr.PropsSI('D', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                cp = cpr.PropsSI('C', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                kair = cpr.PropsSI('L', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
+                mu = cpr.PropsSI('V', 'T', np.mean(Tf[i-1,:]), 'P', 5e5, 'Air')
                 
                 alpha = eps*rhof*cp
                 beta = eps*kair
@@ -719,18 +705,12 @@ for ii in range(0, 3):
                 Tf[i,1:] = sp.sparse.linalg.spsolve(A, Tf[i-1,1:] + (q + p)*bc1 + \
                             r*Ts[i-1,1:])
                     
-                if np.any(Tf[i,1:]) < 500.0:
-                    Tf[i,1:] = np.where(Tf[i,1:] < 500.0, 500.0, Tf[i,1:])
-                    
-                if np.any(Ts[i,:]) < 500.0:
-                    Ts[i,:] = np.where(Ts[i,:] < 500.0, 500.0, Ts[i,:])
-                
                     
                 Tf0[i] = Tf[i-1,-1]
                 QQ[ii,i] = 0
                 
                     
-            # Extra power without TSS (only solar dish)   
+            #%% Extra power without TSS (only solar dish)   
                 
             QQsolar[ii,i] = mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + Tin[i]),
                                              'P', 5e5, 'Air')*(Tref - Tin[i])
