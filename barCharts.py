@@ -41,8 +41,8 @@ N = ['1', '2', '4']
 # LbyD_C = [2.0, 1.5, 1.5]
 # LbyD_M = [2.0, 1.0, 1.0]
 
-pC = np.array([[588, 563, 511], [488, 399, 194], [404, 217, 184]])
-pM = np.array([[595, 578, 541], [516, 422, 227], [420, 220, 185]])
+pC = np.array([[523, 355, 206], [434, 228, 196], [625, 600, 545]])
+pM = np.array([[552, 452, 241], [451, 232, 196], [633, 615, 577]])
 
 # Configurar colores
 colors = ['r', 'g', 'b']
@@ -62,7 +62,7 @@ for i, m in enumerate(month):
 plt.ylabel('Precio')
 plt.legend([r'$N = 1$', r'$N = 2$', r'$N = 4$'])
 ax.set_box_aspect(1)
-ax.set_ylim([0, 600])
+ax.set_ylim([0, 800])
 plt.savefig('./pCbar.eps', bbox_inches='tight',
             format='eps')
 
@@ -83,7 +83,7 @@ for i, m in enumerate(month):
 plt.ylabel('Precio')
 plt.legend([r'$N = 1$', r'$N = 2$', r'$N = 4$'])
 ax.set_box_aspect(1)
-ax.set_ylim([0, 600])
+ax.set_ylim([0, 800])
 plt.savefig('./pMbar.eps', bbox_inches='tight',
             format='eps')
         

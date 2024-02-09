@@ -34,7 +34,6 @@ plt.rcParams['lines.markersize'] = 1
 
 cm = 1/2.54 
 
-
 #%% DISH STUFF
 
 # fig, ax1 = plt.subplots()
@@ -59,11 +58,11 @@ def cpG(T):
 #%% CASE
 
 # Case
-L = 1.5 #1.25 #0.5 #2 #4.5
-D = 1 #L/2 #1.67*2 #3
+L = 1.0
+D = 1.0
 
 N = 4
-loc = 0
+loc = 1
 
 G0 = 0.043
 
@@ -171,15 +170,6 @@ em[2,:] = np.interp(t/3600, dec_em[:,0], dec_em[:,1])
 
 
 #%% MONTHS LOOP
-
-
-# LL = np.arange(0.25, 2.25, 0.25)
-# DD = np.arange(0.25, 2.25, 0.25)
-
-
-# for kk in range(0, len(LL)):
-# for jj in range(0, len(DD)):
-
 
 for ii in range(0, 3):
         
@@ -346,7 +336,6 @@ for ii in range(0, 3):
                     QQ[ii,i] = mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + Tf0[i]),
                                                 'P', 5e5, 'Air')*(Tref - Tf0[i])
                     
- 
                     
             elif (Tin[i] >= Tref) and (Tin[i] < Tf[i-1,-1]):
                 
@@ -980,12 +969,12 @@ display('EE = ' + str(EE) + ' kWh')
 display('CO2tot = ' + str(CO2tot) + ' eq. T')
 
 with open('./Emean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
-          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+          loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EE,0))))
 
 with open('./CO2mean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
-          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+          loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(CO2tot,0))))
     
@@ -999,12 +988,12 @@ display('CO2totSolar = ' + str(CO2totSolar) + ' eq. T')
 
 
 with open('./EmeanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
-          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+          loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(EEsolar,0))))
     
 with open('./CO2meanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
-          month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
+          loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
     archivo.write(str(int(np.round(CO2totSolar,0))))
     
