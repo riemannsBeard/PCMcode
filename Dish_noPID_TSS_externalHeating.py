@@ -96,6 +96,9 @@ ks = 120
 em = np.zeros((3, len(t)))
 emSolar = np.zeros((3, len(t)))
 
+gen = np.zeros((3, len(t)))
+genSolar = np.zeros((3, len(t)))
+
 QQ = np.zeros((3, len(t)))
 QQsolar = np.zeros((3, len(t)))
 
@@ -153,9 +156,25 @@ pp[1,:] = np.interp(t/3600, june_pelec[:,1], june_pelec[:,0])
 pp[2,:] = np.interp(t/3600, dec_pelec[:,1], dec_pelec[:,0])
 
 
+#%% GENERATION
+
+# MWh
+march_gen = np.loadtxt('./March_gen.csv', delimiter=";",
+                       dtype=float)
+june_gen = np.loadtxt('./June_gen.csv', delimiter=";",
+                      dtype=float)
+dec_gen = np.loadtxt('./Dec_gen.csv', delimiter=";",
+                     dtype=float)
+
+# Interpolacion
+gen[0,:] = np.interp(t/3600, march_gen[:,0], march_gen[:,1])
+gen[1,:] = np.interp(t/3600, june_gen[:,0], june_gen[:,1])
+gen[2,:] = np.interp(t/3600, dec_gen[:,0], dec_gen[:,1])
+
+
 #%% EMISIONS
 
-# eq CO2 kg/MWh
+# CO2 eq. t/h
 march_em = np.loadtxt('./March_em.csv', delimiter=";",
                        dtype=float)
 june_em = np.loadtxt('./June_em.csv', delimiter=";",
@@ -163,10 +182,10 @@ june_em = np.loadtxt('./June_em.csv', delimiter=";",
 dec_em = np.loadtxt('./Dec_em.csv', delimiter=";",
                      dtype=float)
 
-# Interpolacion
-em[0,:] = np.interp(t/3600, march_em[:,0], march_em[:,1])
-em[1,:] = np.interp(t/3600, june_em[:,0], june_em[:,1])
-em[2,:] = np.interp(t/3600, dec_em[:,0], dec_em[:,1])
+# Interpolacion CO2 eq. t/MWh
+em[0,:] = np.interp(t/3600, march_em[:,0], march_em[:,1])/gen[0,:]
+em[1,:] = np.interp(t/3600, june_em[:,0], june_em[:,1])/gen[1,:]
+em[2,:] = np.interp(t/3600, dec_em[:,0], dec_em[:,1])/gen[2,:]
 
 
 #%% MONTHS LOOP
@@ -736,9 +755,9 @@ for ii in range(0, 3):
         priceTheoDay[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T',0.5*(Tref + 500), 'P', 5e5, 'Air')*
                                     (Tref - 500)*1e-6*pp[ii,:], t/3600)
         
-        CO2[ii] = np.trapz(QQ[ii,:]/1e6*em[ii,:], t/3600)
-        CO2Solar[ii] = np.trapz(QQsolar[ii,:]/1e6*em[ii,:], t/3600)
-        CO2Theo[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
+        CO2Day[ii] = np.trapz(QQ[ii,:]/1e6*em[ii,:], t/3600)
+        CO2DaySolar[ii] = np.trapz(QQsolar[ii,:]/1e6*em[ii,:], t/3600)
+        CO2DayTheo[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
                                     (Tref - 500)/1e6*em[ii,:], t/3600)
         
         price[ii,:] = QQ[ii,:]/1e6*pp[ii,:]
@@ -1032,7 +1051,7 @@ fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
 ax1.plot(t/3600, price.T, '--')
 ax1.set_prop_cycle(None)
 ax1.plot(t/3600, priceTheo.T, '-')
-plt.ylabel(r'€/h')
+plt.ylabel('€/h')
 plt.xlabel(r'$t$ (h)')
 plt.legend([r'March', r'June', r'Dec.'])
 plt.savefig('./Comp_inst_energy_price' + '_LbyD_' + str(L/D) + '_' + loc_ +
@@ -1040,3 +1059,17 @@ plt.savefig('./Comp_inst_energy_price' + '_LbyD_' + str(L/D) + '_' + loc_ +
             bbox_inches='tight', format='eps')
 plt.show()
 
+
+#%% PLOTS
+fig, ax1 = plt.subplots(figsize=(7*cm, 7*cm))
+
+ax1.plot(t/3600, em.T, '-')
+# ax1.set_prop_cycle(None)
+# ax1.plot(t/3600, CO2, '-')
+plt.ylabel(r'CO2 eq. t/MWh')
+plt.xlabel(r'$t$ (h)')
+plt.legend([r'March', r'June', r'Dec.'])
+plt.savefig('./CO2emissions' + '_LbyD_' + str(L/D) + '_' + loc_ +
+            '_N_' + str(int(N)) + '.eps',
+            bbox_inches='tight', format='eps')
+plt.show()
