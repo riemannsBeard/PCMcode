@@ -58,11 +58,11 @@ def cpG(T):
 #%% CASE
 
 # Case
-L = 1.0
+L = 2.0
 D = 1.0
 
-N = 4
-loc = 1
+N = 1
+loc = 0
 
 G0 = 0.043
 
@@ -785,16 +785,16 @@ for ii in range(0, 3):
             archivo.write('precio teo = ' + str(int(np.round(priceTheoDay[ii],0))))
             
             
-        display('CO2/day = ' + str(CO2[ii]) + ' eq. T')
-        display('solar CO2/day = ' + str(CO2Solar[ii]) + ' eq. T')
-        display('CO2 theo/day = ' + str(CO2Theo[ii]) + ' eq. T')
+        display('CO2/day = ' + str(CO2[ii]*1e3) + ' eq. kg')
+        display('solar CO2/day = ' + str(CO2Solar[ii]*1e3) + ' eq. kg')
+        display('CO2 theo/day = ' + str(CO2Theo[ii]*1e3) + ' eq. kg')
        
         with open('./CO2_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
                   month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
-            archivo.write('T eq. CO2 = ' + str(int(np.round(CO2[ii],0))) + '\n')
-            archivo.write('T eq. CO2 solar = ' + str(int(np.round(CO2Solar[ii],0))) + '\n')
-            archivo.write('T eq. CO2 teo = ' + str(int(np.round(CO2Theo[ii],0))))
+            archivo.write('T eq. CO2 = ' + str(int(np.round(CO2[ii]*1e3,2))) + ' eq. kg \n')
+            archivo.write('T eq. CO2 solar = ' + str(int(np.round(CO2Solar[ii]*1e3,2))) + ' eq. kg \n')
+            archivo.write('T eq. CO2 teo = ' + str(int(np.round(CO2Theo[ii]*1e3,2))) + ' eq. kg')
         
 
 #%% CALCULO CAIDA PRESIÓN TÉRMICA (despreciable)
@@ -985,7 +985,7 @@ EE = 0.25*(2*E[0] + E[1] + E[2])
 CO2tot = 0.25*(2*CO2[0] + CO2[1] + CO2[2])
 
 display('EE = ' + str(EE) + ' kWh')
-display('CO2tot = ' + str(CO2tot) + ' eq. T')
+display('CO2tot = ' + str(CO2tot*1e3) + ' eq. kg')
 
 with open('./Emean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
@@ -995,7 +995,7 @@ with open('./Emean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
 with open('./CO2mean_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
-    archivo.write(str(int(np.round(CO2tot,0))))
+    archivo.write(str(int(np.round(CO2tot*1e3,2))))
     
 #%% SOLAR ENERGY & EMISSIONS
 
@@ -1003,7 +1003,7 @@ EEsolar = 0.25*(2*Esolar[0] + Esolar[1] + Esolar[2])
 CO2totSolar = 0.25*(2*CO2Solar[0] + CO2Solar[1] + CO2Solar[2])
 
 display('EEsolar = ' + str(EEsolar) + ' kWh')
-display('CO2totSolar = ' + str(CO2totSolar) + ' eq. T')
+display('CO2totSolar = ' + str(CO2totSolar*1e3) + ' eq. kg')
 
 
 with open('./EmeanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
@@ -1014,7 +1014,7 @@ with open('./EmeanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
 with open('./CO2meanSolar_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
           loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
 # Escribir el resultado en el archivo
-    archivo.write(str(int(np.round(CO2totSolar,0))))
+    archivo.write(str(int(np.round(CO2totSolar*1e3,2))))
     
 #%% ENERGY PRICE
 

@@ -1,9 +1,10 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 0 0 204 197
-%%HiResBoundingBox: 0.000000 0.000000 203.864775 196.603108
-%%Creator: MiKTeX GPL Ghostscript 925 (ps2write)
+%%BoundingBox: 0 0 203 196
+%%HiResBoundingBox: 0.000000 0.000000 202.979210 195.606844
+%%Invocation: gs -dBATCH -dNOPAUSE -r6000 -sDEVICE=ps2write -dEPSCrop -sOutputFile=? ?
+%%Creator: GPL Ghostscript 10021 (ps2write)
 %%LanguageLevel: 2
-%%CreationDate: D:20240212085811+01'00'
+%%CreationDate: D:20240212200943+01'00'
 %%EndComments
 %%BeginProlog
 save
@@ -15,16 +16,28 @@ newpath
 %%EndProlog
 %%Page 1 1
 %%BeginProlog
+10 dict dup begin
 /DSC_OPDFREAD true def
 /SetPageSize true def
 /EPS2Write false def
-currentdict/DSC_OPDFREAD known{
-currentdict/DSC_OPDFREAD get
-}{
-false
+end
+count 0 ne{
+dup type/dicttype eq{
+dup/EPS2Write known{
+dup/EPS2Write get not
+}
+{
+true
+}ifelse
+}
+{
+true
+}ifelse
+}
+{
+true
 }ifelse
 10 dict begin
-/DSC_OPDFREAD exch def
 /this currentdict def
 /y 720 def
 /ebuf 200 string def
@@ -36,6 +49,7 @@ false
 36//this/y get moveto
 //this/y 2 copy get 12 sub put
 }bind def
+{
 errordict/handleerror
 {systemdict begin
 $error begin
@@ -87,8 +101,24 @@ quit
 end
 end
 }bind readonly put
+}if
 end
 50 dict begin
+count 0 ne{
+dup type/dicttype eq{
+{def}forall
+false
+}
+{
+true
+}ifelse
+}
+{
+true
+}ifelse
+{
+(   *** Warning: global definitions dictionary not found, file may be corrupted.\n)print flush
+}if
 /DefaultSwitch
 {
 dup where{
@@ -615,6 +645,7 @@ copypage
 }repeat
 }if
 EPS2Write not{showpage}if
+pagesave restore
 }if
 }bind def
 /stream
@@ -839,6 +870,7 @@ pop pop
 }if
 1 index exch/Context exch put
 dup/ImmediateExec true put
+/pagesave save def
 dup/IsPage true put
 SetPageSize{dup/Context get//SetupPageView exec}if
 }bind def
@@ -3510,7 +3542,10 @@ grestore
 //GraphicState/FontMatrixNonHV currentfont/FontMatrix get 1 get 0 ne put
 }bind def
 /ShowText
-{//GraphicState/TextRenderingMode get 0 eq{
+{
+//GraphicState/TextRenderingMode get dup 0 eq
+exch 3 eq not currentfont/FontType get 3 eq and or
+{
 //GraphicState/WordSpacing get 0
 32
 //GraphicState/CharacterSpacing get 0
@@ -3565,12 +3600,26 @@ exch cshow
 }ifelse
 }bind def
 /ShowTextBeg
-{//GraphicState/TextRenderingMode get 0 ne{
+{
+//GraphicState/TextRenderingMode get dup 0 ne
+{
+3 ne
+currentfont/FontType get 3 eq not and{
 currentpoint newpath moveto
 }if
+}
+{
+pop
+}ifelse
 }bind def
 /ShowTextEnd
-{//GraphicState/TextRenderingMode get
+{
+//GraphicState/TextRenderingMode get
+currentfont/FontType get 3 eq{
+dup 3 ne{
+pop 0
+}if
+}if
 {dup 1 eq{
 stroke exit
 }if
@@ -8321,8 +8370,8 @@ endobj
 %%EndResource
 %%BeginResource: procset (PDF Font obj_11)
 11 0 obj
-<</BaseFont/MNNVIZ+SFRM1095/FontDescriptor 12 0 R/Type/Font
-/FirstChar 191/LastChar 191/Widths[ 773]
+<</BaseFont/ENSDHE+SFRM1000/FontDescriptor 12 0 R/Type/Font
+/FirstChar 191/LastChar 191/Widths[ 778]
 /Encoding 17 0 R/Subtype/Type1>>
 endobj
 %%EndResource
@@ -8334,14 +8383,14 @@ endobj
 %%EndResource
 %%BeginResource: procset (PDF Font obj_9)
 9 0 obj
-<</BaseFont/BHQRTQ+CMMI10/FontDescriptor 10 0 R/Type/Font
+<</BaseFont/NFKRVN+CMMI10/FontDescriptor 10 0 R/Type/Font
 /FirstChar 116/LastChar 116/Widths[ 361]
 /Subtype/Type1>>
 endobj
 %%EndResource
 %%BeginResource: procset (PDF Font obj_7)
 7 0 obj
-<</BaseFont/DVGYBR+CMR10/FontDescriptor 8 0 R/Type/Font
+<</BaseFont/RSQLZO+CMR10/FontDescriptor 8 0 R/Type/Font
 /FirstChar 40/LastChar 117/Widths[ 388 388 0 0 0 0 277 0
 500 500 500 0 0 500 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 763 0 0 0 0 0 513 0 0 916 0 0
@@ -8353,13 +8402,13 @@ endobj
 %%EndResource
 %%BeginResource: file (PDF FontDescriptor obj_12)
 12 0 obj
-<</Type/FontDescriptor/FontName/MNNVIZ+SFRM1095/FontBBox[0 0 717 685]/Flags 4
-/Ascent 685
-/CapHeight 685
+<</Type/FontDescriptor/FontName/ENSDHE+SFRM1000/FontBBox[0 0 722 684]/Flags 4
+/Ascent 684
+/CapHeight 684
 /Descent 0
 /ItalicAngle 0
-/StemV 107
-/MissingWidth 331
+/StemV 108
+/MissingWidth 333
 /CharSet(/Euro)/FontFile 14 0 R>>
 endobj
 %%EndResource
@@ -8368,65 +8417,46 @@ endobj
 <</Filter[/ASCII85Decode
 /LZWDecode]
 /Length1 448
-/Length2 3812
-/Length3 533/Length 3841>>stream
-J-eUh@sPTJ<'6ZZUCh1X>VI0($=mV.1h&-YNBooDLk*Q\0qAFO,:T/2D?UF+OCCekb\n%%A'tYq
-OQpeIa^jt*0ne7p2BGH=j!]FS6T:K0#?.=\j<,e=b`q.,VEAEG:Ca8>AIR<^UXEjug3lGfE]472
-<0IblY?<WMN.M.oPeps_cu&Bq.FPmu(W>=<Gg5S]75l(K;KFgJA2P;3$n!9^K^oHe#U?kTOmY:Y
-WLa4s;o+F>+;]rq`q-$#bTO0_6k]*Q.W%-^NaoS?WQJXZ"^Q$?PKk(IF=*AMLEfQM[P3Jq,IsDD
-8#@CG(N,RT_7K<B^-RQC,CYIC%3,i\!n!CY1,0[V-:<ogb@SQYpZik;4=5rG]E*8M0Vn1&'^RNj
-S!H!m@jnK:N.[m#be+#sHFfcjqEiT45ZB;W/gI%5TI?Qc82?-3:lH9JTt$%$L12io(^NEpL)Yq%
-873DAd<KUJ#XP,:)MXstL`ls(0OuD!OapsZL?s/@*4eHbAf6?>N/AS[+t/*f`I]3H+U68KL*6hr
-Lhn5h_6@Mq#/S)i*/6bhBHdW^(lB1:Z/CK_`^0rO,6ma5L)bs,J:\Vm;HRfTLnW%S)MS;9N;///
-J;OLc&qp$"9U$*?)nhr,L`?V>Lh-::dB%%;cf*+%)HKa)5Tkk<[4,5`&qkHO"sPWD70->/ml#ne
-#\Y%Z@BA?$L9j^2p]^ba;B,n%BS.F^+s:GjfjTQs/&%^ME$9t0TSt%K;<W]\?#QAM*!Z$Tj<9>B
-.#]:i'6n@V:1>2N,9r>4C)bV[S^o"j(W_CUL(r&lLk[m,)&<L#V7n-P@D)8V>+pUg+U1mGAfTQ7
-*9BHlFi<hggS-7W+GSG]kuqXWBShdFU*,%*aVfVB)r9Jr0lGlo/:J`J0r1.8=jd`T,$RAfL`-K7
-'a>mOmq?,ebEZaVD:4Pi3?H>hK[M(G=d6HhL3@05A^$A#<A`M+&;*Ve\X*+Jc1dl`IE)AK>F7lW
-LgV,*1)P_AJPsHC(LI]:iN#YX&8R;'<Mp]ULGY=&)=a+#EIps>*<11WdKM3="sKPA)9d)cnN"gY
-,ZdEF:TdJOaEkU4B$/p=&Q=G3UpV$24,m*1g\%A+?AARf'`-0c0)%E3p(VG>;-:Q?>WpSmCHuF;
-:9?k1)Yu7T7en=E5YIDb@I%@V287ku3DaVa6-D?0O/s9OQd2#IROr,EjP;,I(7mh&n4]MZ?*(mq
-^&a#s@k0EZXl+rP''bM`/$[I(FVk]lgDN+f,i#QPYae\@AP<Z.)*/MVU>$MD:on[&,=H@H!MWU!
-aMGBm,N)%!/#6?`%8nL*Sr_?f0j.?_5/UFfT2^F-E+sSQ,bPk5*=P;On57Ui"]j4g\j/uF8TqF?
-][hnUHNp/]OY;ub)\dW_CQ5>U"+V*3J\"cVJD"0bK]95/.dL](?'D*B;VROA??"%=*.rq@&Q06E
-@-_6>0c$4`U[k9l.Fj"tPn:=Mg@&FMnYQD"&n)BbKTKUT5s1H@aV$&m;+iB"-cFfC*/]8M0E#]C
--dIq.KZ-_Z?"M&7<";n0h*+TTN&AX6R94eHA'#HU^f6DRi63cJWR3XDUq"_'C0=>K4[LejXSLQH
-&;Vd2q(IIpecDkH=t93b"BMf?V0%0<.CdEp(<6TAP&"qdE$7:[iiJ@Wk>;k#A>G&uXqQ/C9<35.
-0SU(^(+aQ$Wi`?PPK%k#U2rLQ$m?o6K"KJ-]j+3e)lG!Vo2r"k=04o'X%-X:-4<1LaOMNJoX(1C
-"/-qK.>TVMY:,^l&R,Pj0#/0]%29I(QAJaf,fM\sdN^5VkK+pC[]H*)CQD[6*C6[%35ZaE#R5&n
-Hn%&npenII8BQoj[:E7#g&dOa./eP$@s$(i3fdiEV&Zi5domK$l;e<^)5MHpYZ@LQ?YIhAW?k`K
-BPP'`ZgG$%ophJ;9<h2?d5`i0WhWPAlUL27Do!1`d1\R_1%:/sObHQS+[WM+BY;B\`<+X,9QWJ$
-SM`(2B]5)-3CenQ;m\r!bjJ(UD3I7S:LpW-f+U#_$B]/SW,VLnK0)N#ooD&D7Rg:p$[crn<m4U'
-Q=(?j5,lN%YU%<-d;%N=9JI^#C;dhgCPt_7q"2BpT.-)t<1Qo%@bMPK4&bu3Bo)/X_kar7((0%l
-9FB1dLnr2FU0oo/APts]As!dZ<,JXq9.uVQM^^JM>tuGq_&<2><-gO8P0pe8"_+64$L)"(5t/sc
-]To_':JaUl2;;+_OdI>p:!6P;WHb5*Q:i]&lnN*2[q1lY'*hA>[6Lr^'XCVqY)c-8OZa=;&g-oh
-N)-m3-\o*Cfqm5&.:nC<OGH?ae-/?`64Ba![c;&/Ya1,gB3[jsYbrOtSLGRAaAgs=-A$HKA9#H.
-Qli$a!V@Uooe*09(ulBPl)P5T,pXC=Hs\*c4Y*gA22>"MOcmp`c@q'-KNfPQM&[`Jn;K[+lM0pK
-l<27U(;>.GF;,EM<9uca`@VO7n#F6-@1?\Lnh/PCa>H+54\[AjWhr_Jm9PRR9ARUtPg?C?TA-?>
-"(e!j<%\-t.I73?Pea%oD#T^DTt;kPU6lQ\bFR,EJ%\meU7rQ^>7q)r\kW\\QL$KcA8NeZVd7-2
-3hTpj0oE=2Y-(fHLSr;R(S=[JdiK]mV6"[+*nEllP^FBEbF`[M-V2J_UB5G9AppNL9#)-5?sf++
-1p5W@Hsd;`Y&Y0R-Ktg@NgBZPl+rT9[/Qb"lr$9/\_*e1#*PEi_9S$K]r^:91D-]djiGCo.CC).
-:N>EA*@3ZtVdc3@o+=nOY/)^T;Qj&VoUh'U9$'),_&$.UO4]QMEeNl#?,=+E1c>`Dedu_l;VPjK
-.s\'<EfsqDQ:<W4F$bb^+4`d6p27uLY%2<5)&.2M$#r$OKs7jak(i?L@qNT9Lm/L_<^n4fl_ei_
-#hZ5IBTmj"6j?Jr<MW5aW5Tu1C6=W]]8b?>jhkTjG>Jm'kXBQt/@'q2dr)aAJVmc`.L%(j`:RF"
-b,Y\VYc[h',jJ"bc<DQu9P,b<,jIprp6,h'8HuCp#>RhMg197!hhZlEBE!R'#ZSkI")AT]jnN7,
-KNP((Q@sK[A9p[]P\/&<9kBDnKS\O(oV&,0dV2*DLLcF&%c>3RkJQLjA`b4l%SPq*8SAZ*-,+mT
-fMJ?u:B_eR-(:5*1l&q%986V^K^q&KR&NPY:BN;4KO@]rr^pbe:i8[V9ud(nW_KDj;P\!Y`o?b!
-Jn'Ki8>P$U`6N6HS5dHeChC22%a81tJ4_J&<+uCs,tK7-BNQQm9#_cRA84Y-!1F"39`s="V!q2l
-BS0%gmKPGYV#IadAn:+G8oC_W:;g[65%3X6pVog2V&#)F,$ebRh*jeoj.rG@3X-n],38#5k-5Q`
-/="/.:_'4171`F/QOl[NJgCt"jQo\Q`)oUJ>"KK7bOh5,+@cqN7>,>t`ZWUm)T/`K@0C8/7&[DJ
-(e(>tkp6[pk>"n9`3*[79'N"HVFX.OhF`X&*!F)#A;3jU&kXKQ9neg/AQD8*:0lr5;hT0`K[="Y
-4EQ8Q9B:mf/s8Dp]+P:s4i\?&,^u9(%##&RcQh/(BhV&?A0YjQCh"M\L4W'sfO<mI:Bd&*O-GBo
-FB+:D4XJZMKTp$3!oC'SotXs]k%J(tl>"9j;?WBe93@!]U0&^48M22^"mSls7Rf#c>;'5s8!7i4
-MHOkr@Uu?UD:J]+Z9G-r:GBLSBs)TZE?Yao?D^>K$F"'EVTqa'>,@s1NG*%%mWe'SJ-QKS7N-k*
-%S@!rJr*TG7!aH;0Ocgu1UB5#o0G2h75T'S1NQ,Eo2.A$:GgO#27$RG'3R3aAN"Ti2D]&*o34-%
-EAqr12cFu\o051_JN.\A$t.^?^uPuWfFC0t!C?h~>
+/Length2 2033
+/Length3 533/Length 2377>>stream
+J-eUh@sPTJ<'6ZZUCh1X>VI0($=mV.1h&.t!eqp3!Kb`>3X?-`;`UZ/$5^N$`052.hB3`WA+C9V
+eDVU78YlQ"$+/,s4Hl\?;#m8DD`4*qVaDoS5YX2*.Al&tFNS3dSP=j]&[mNcUf+1Vl@hdiD@dM]
+"ra=AY[oa2":$/#KZOCj>GlF=V07YJM8`roMpT+oDDBXO`c2""C,QV?:.HN8j:j9Z7krI+gi?+e
+49u@nK,L=I0,GRek=Ul(6"3$6--%--eo!2^a"YP4PeP'C\m;KES1LW&9e`+J7\'j%@1O2F1EAZ7
+83ej]h!VXmFlutUK+Ni.r<_m13#m_XUG8!P@Pl,]#9tt;a+N19<W!DQ9bKGSL#RX"P<Xk%Y/6'6
+:u4'gU:AW,%ZN7umu2,Ck^t,%"%9YM:obqQ%YHNcU(".@at\H60P2M`i\T^A#bcd%)2M_2JfG!r
+J8cGr_8'S)#(dD$)Mg^&KGY!2OGtEtDeO%/#_C0n,)0NnC`(6S5`-]jEEJ###XP\.)@0d`MAV)b
+(i1,q@N]J,#,0+K)hrqe?m1?"OGb-8U)[P`LE\Ej1WVl'DAWX&Lh.k:iM_VRaPj(*+pcX;E[$'.
+G[i,IEt&*lL@8M\+pSXT(GU`nS7OENU!2(+<RNjG+UB8#WC^++`A\f-iJ<C^d/[/!3mD)pJf4go
+QtnV!6*/EV^#=KPq?I%rfHA69Lklp=2F(\1b+YJ=)@$<\C)RAp(hF`o;I.]jL4E*>)pgBkL*B0?
+0S:IlTsX2HLiI`"(^?\HF(ei'0QDIGJf6@6dS>f=KgfGk@;Z@8^i)>@<fg`/#XO^Q)2C,cLH&*3
+*G[`kG*%U%aOA4f)ImT*]0/SKQuF1r@D.%*a4#j'"UK]+[7/3r`)W/];;DmCLm]BC+GR4&!u^Bh
+-'K6PP3?aEd^,$e,$br1CSIS5&/6(<f;6_L:UiOSUY.XZ)mQ[>ee&qPF!Vc8=8''C436#Hl$*CM
+S@FPM(MIGcD\BJp.V,#Z=<QV>UtE^c)P.="cWW1B8]O-?+)+kZ26h8KQ5!Pg>.8m_=jYWhB6%ND
+rUZB%Tp)6J97!E\.#9T`96:H(*.9^NeKAd(`Y#(>ElaV%B-QG7S:N\6%Z\:i:]`;5q?@ah`?e;<
+1YFWY[QY(?c0W/e+OYH[clB_#'d:"fph4?Gd>I3i@,^VX1N8;B_W+[s!DTFIg:EFLaT`mo)uuXD
+X;o,XFY'M)4-bo9TAnX4BXer`=.6)?Wr<2QV(70tEjsVA'3C%?*1nom!g?P_<?W*cK,-!M!XaNU
+9AgWhAKIf`OuGP)X;`RQP-p+WNa<&MC;';?Pp+l9H0FoWVuUSBd?0J\lWG^<5]W?TU,QoPd>tG_
+hNH:=7U\rHh(%>t[MN\-N9sHb[5`OCgL7Srm1h,sP^O2U&o2mAWGODTrXN2-ekf!c[\T.PU(;!V
+8SFrU0%b]<cXKaLZ40d91p8<3$FFc85rGE+TTrK(+u]nG73cC_\(XbJBWItO-+2=Q<oZAk:mndE
+`K6-^o*A>Hh.`b=.(0ofgJ4eu$5%p0+Q:21NfPJOV+!l+dcAbDM\sJp,9H[0.XHcHd@V[DJ>8I*
+a]D75.ANa#R";P2J+7hgY%EY9gsgNPm"G!jPZoC6K:6#"[#;HdDUDN(b>`JQKWjFgVH;QdBhp&l
+-tX[G<J",!auq@2jTM%*i%mel^`98+OMb#6Q"`mc'!Z$_MI&p+<.MuIU9quN+^2utlI6b(AP/iM
+S1@(N?*CDb)Uqnf<L`DRBc->S^6au0;N)?[UDf$$V]msQaMh#[GabGF&m0&q)*>,J2Tb/$AS96g
+2E&MiUOZ<+7k8RJ-$@G!SZ5+]B'&?_2:<%6]kh1kTq/&KA?XV=qKSshQ`;n]\\X@7#"h0',DC6]
+<0CIl#IWlt:i)I:qP.E?GuZ,Tp9p-Y^6/k,8M.qGSgbRc;Q3j<<[eZdf_X$+-KQj$-;QQt;l3(O
+=i[mK[nC0[E)>`6/1ss"%FJ?];A"A/`0@FW_6[TelI>N5\p044RR:^Z%8*Ml&=67'cpq(/Sh)/6
+ePW83@*9V9f(7b9Y<Adr9U:qr\p7ce)_)-<[GnBtf,)mkK6:4ba"/RkO!K>3E@[?@W:d3'(i"%]
+9PlAbV&l0@Abf!".I40jGo,%sVc&J$)\JmMNEjDUOr!FU/nH;S)<-1KN+MUZ$$)f4dj:7.[d_.E
+]!RgXbJpSKh^=WGPM9k&C[qptX(1#KPJW/iWNf?*[A8.b8oIL-`s'Bq_]\DM1K[JA`2.f>#i7*:
+?m]-;BAEHXoEKln=q<r54Sb[m7Z#Mr,=C\.*M`7%NRA_@8nZs+V0'_;de[TOBO*QpFU!BFqM.s9
+E5ih)W,`B%X>pKh'L4n~>
 endstream
 endobj
 %%EndResource
 %%BeginResource: file (PDF FontDescriptor obj_10)
 10 0 obj
-<</Type/FontDescriptor/FontName/BHQRTQ+CMMI10/FontBBox[0 -11 330 626]/Flags 131104
+<</Type/FontDescriptor/FontName/NFKRVN+CMMI10/FontBBox[0 -11 330 626]/Flags 131104
 /Ascent 626
 /CapHeight 626
 /Descent -11
@@ -8476,7 +8506,7 @@ endobj
 %%EndResource
 %%BeginResource: file (PDF FontDescriptor obj_8)
 8 0 obj
-<</Type/FontDescriptor/FontName/DVGYBR+CMR10/FontBBox[0 -250 879 750]/Flags 32
+<</Type/FontDescriptor/FontName/RSQLZO+CMR10/FontBBox[0 -250 879 750]/Flags 32
 /Ascent 750
 /CapHeight 705
 /Descent -250
@@ -8679,7 +8709,7 @@ endobj
 %%Page: 1 1
 %%BeginPageSetup
 4 0 obj
-<</Type/Page/MediaBox [0 0 203.86 196.6]
+<</Type/Page/MediaBox [0 0 202.98 195.61]
 /Parent 3 0 R
 /Resources<</ProcSet[/PDF]
 /Font 13 0 R
@@ -8688,369 +8718,364 @@ endobj
 >>
 endobj
 %%EndPageSetup
-/pagesave save def
 5 0 obj
-<</Length 6640>>stream
+<</Length 6614>>stream
 q 0.012 0 0 0.012 0 0 cm
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 1 G
 1 g
-q 1.04225 0 0 1.04225 0 0 cm
-0 -34.5405 m
-16300 -34.5405 l
-16300 15684.9 l
-0 15684.9 l
+0 -29 16914.9 16300.6 re
 f
-Q
-q 1.00544 0 0 1.00544 0 0 cm
-3554.42 3114.93 m
-16300 3114.93 l
-16300 15531.6 l
-3554.42 15531.6 l
+3499.97 3055.86 12815 12484.3 re
 f
-Q
 0 G
 0 g
-4156.27 3131.88 m
-4156.27 2840.21 l
+4082.47 3055.86 m
+4082.47 2764.19 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-4156.27 3131.88 m
-4156.27 2840.21 l
+4082.47 3055.86 m
+4082.47 2764.19 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-9010.42 3131.88 m
-9010.42 2840.21 l
+8936.58 3055.86 m
+8936.58 2764.19 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-9010.42 3131.88 m
-9010.42 2840.21 l
+8936.58 3055.86 m
+8936.58 2764.19 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-13864.6 3131.88 m
-13864.6 2840.21 l
+13790.8 3055.86 m
+13790.8 2764.19 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-13864.6 3131.88 m
-13864.6 2840.21 l
+13790.8 3055.86 m
+13790.8 2764.19 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 3699.35 m
-3282.1 3699.35 l
+3499.97 3623.32 m
+3208.31 3623.32 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 3699.35 m
-3282.1 3699.35 l
+3499.97 3623.32 m
+3208.31 3623.32 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 6051.34 m
-3282.1 6051.34 l
+3499.97 5975.32 m
+3208.31 5975.32 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 6051.34 m
-3282.1 6051.34 l
+3499.97 5975.32 m
+3208.31 5975.32 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 8403.33 m
-3282.1 8403.33 l
+3499.97 8327.33 m
+3208.31 8327.33 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 8403.33 m
-3282.1 8403.33 l
+3499.97 8327.33 m
+3208.31 8327.33 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 10755.3 m
-3282.1 10755.3 l
+3499.97 10679.3 m
+3208.31 10679.3 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 10755.3 m
-3282.1 10755.3 l
+3499.97 10679.3 m
+3208.31 10679.3 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 13107.3 m
-3282.1 13107.3 l
+3499.97 13031.3 m
+3208.31 13031.3 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 13107.3 m
-3282.1 13107.3 l
+3499.97 13031.3 m
+3208.31 13031.3 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 0 G
 0 g
-3573.77 15459.3 m
-3282.1 15459.3 l
+3499.97 15383.3 m
+3208.31 15383.3 l
 f
+false setstrokeadjust
 66.6667 w
 1 j
-3573.77 15459.3 m
-3282.1 15459.3 l
+3499.97 15383.3 m
+3208.31 15383.3 l
 S
 Q
+false setstrokeadjust
 q
-3573.75 3131.92 12815 12484.3 re W n
+3500 3055.83 12815 12484.3 re W n
 [ 462.5 200 ] 0 d
 125 w
 1 j
 0.12207 0.467041 0.705078 rg
 0.12207 0.467041 0.705078 RG
-4156.27 3699.35 m
-4182.96 3719.16 l
-4978.56 4302.94 l
-5678.53 4793.8 l
-6452.77 5338.43 l
-7387.19 6029.13 l
-7762.9 6334.25 l
-8014.83 6528.49 l
-8372.59 6790.97 l
-8826.45 7096.3 l
-9388.56 7460.15 l
-9845.82 7728.77 l
-10331.2 7994.54 l
-10707.9 8180.84 l
-11038 8320.5 l
-11589.4 8555.4 l
-11911.3 8713.29 l
-12259.3 8906.41 l
-12552.5 9089.13 l
-12780.2 9254.05 l
-13020.9 9452.55 l
-13218.5 9634.43 l
-13741.3 10210.8 l
-14442.7 10993.6 l
-14684.9 11232.8 l
-14932.5 11450.9 l
-15300.9 11750.5 l
-15806.2 12136.4 l
-15806.2 12136.4 l
+4082.47 3623.32 m
+4109.17 3643.13 l
+4904.77 4226.91 l
+5604.73 4717.78 l
+6378.97 5262.41 l
+7313.39 5953.11 l
+7689.11 6258.23 l
+7941.04 6452.47 l
+8298.79 6714.95 l
+8752.65 7020.29 l
+9314.76 7384.13 l
+9772.02 7652.75 l
+10257.4 7918.52 l
+10634.1 8104.82 l
+10964.2 8244.48 l
+11515.6 8479.38 l
+11837.5 8637.27 l
+12185.5 8830.39 l
+12478.7 9013.11 l
+12706.4 9178.04 l
+12947.1 9376.53 l
+13144.7 9558.41 l
+13667.5 10134.7 l
+14368.9 10917.6 l
+14611.1 11156.8 l
+14858.7 11374.9 l
+15227.1 11674.5 l
+15732.4 12060.4 l
+15732.4 12060.4 l
 S
 1 0.498047 0.0549927 rg
 1 0.498047 0.0549927 RG
-4156.27 3699.35 m
-4178.11 3719.75 l
-5632.9 5106.88 l
-6331.9 5795.44 l
-7785.23 7238.76 l
-8026.48 7402.31 l
-8309.48 7578.5 l
-8597.82 7735.63 l
-9234.68 8057.26 l
-9615.73 8226.3 l
-10049.7 8398.15 l
-10557.4 8578.84 l
-10929.3 8692.54 l
-12417.6 9121.94 l
-12723.4 9231.84 l
-13016.1 9356.82 l
-13332.6 9511.88 l
-13618.5 9672.05 l
-13889.8 9845.43 l
-14185.4 10057.1 l
-14405.8 10235 l
-14503.4 10344.8 l
-14872.8 10765.1 l
-15580 11533.5 l
-15806.2 11752.6 l
-15806.2 11752.6 l
+4082.47 3623.32 m
+4104.32 3643.73 l
+5559.11 5030.86 l
+6258.1 5719.41 l
+7711.43 7162.74 l
+7952.69 7326.29 l
+8235.68 7502.48 l
+8524.02 7659.61 l
+9160.89 7981.23 l
+9541.94 8150.28 l
+9975.9 8322.13 l
+10483.6 8502.81 l
+10855.5 8616.51 l
+12343.8 9045.91 l
+12649.6 9155.82 l
+12942.3 9280.8 l
+13258.8 9435.86 l
+13544.7 9596.02 l
+13816 9769.4 l
+14111.6 9981.12 l
+14332 10159 l
+14429.6 10268.8 l
+14799 10689.1 l
+15506.2 11457.5 l
+15732.4 11676.6 l
+15732.4 11676.6 l
 S
 0.173096 0.626953 0.173096 rg
 0.173096 0.626953 0.173096 RG
-4156.27 3699.35 m
-4259.66 3717.69 l
-4993.61 3859.42 l
-6112.01 4087.99 l
-7427 4378.3 l
-7837.66 4481.74 l
-8160.46 4585.56 l
-8788.59 4806.95 l
-9144.39 4957.21 l
-9599.23 5142.88 l
-10134.6 5329.19 l
-10730.2 5519.41 l
-11047.7 5596.54 l
-11605.9 5733.45 l
-12086.5 5881 l
-12647.2 6068.48 l
-12891.8 6175.61 l
-14310.7 6865.09 l
-14598 6993.85 l
-14844.1 7082.69 l
-15253.3 7204.8 l
-15596.5 7289.46 l
-15806.2 7330.38 l
-15806.2 7330.38 l
+4082.47 3623.32 m
+4185.86 3641.67 l
+4919.81 3783.4 l
+6038.21 4011.96 l
+7353.2 4302.27 l
+7763.86 4405.72 l
+8086.66 4509.54 l
+8714.79 4730.93 l
+9070.6 4881.19 l
+9525.43 5066.86 l
+10060.8 5253.17 l
+10656.4 5443.39 l
+10973.9 5520.52 l
+11532.1 5657.43 l
+12012.7 5804.97 l
+12573.4 5992.45 l
+12818 6099.58 l
+14236.9 6789.07 l
+14524.2 6917.83 l
+14770.3 7006.67 l
+15179.5 7128.78 l
+15522.7 7213.44 l
+15732.4 7254.35 l
+15732.4 7254.35 l
 S
 [ ] 0 d
 2 J
 0.12207 0.467041 0.705078 rg
 0.12207 0.467041 0.705078 RG
-4156.27 3699.35 m
-4954.29 4285.69 l
-5653.77 4776.94 l
-6438.69 5328.39 l
-7368.26 6014.56 l
-7740.09 6315.42 l
-8137.16 6661.2 l
-9106.53 7531 l
-10215.2 8569.42 l
-10623.5 8930.33 l
-10873 9124.61 l
-11435.6 9524.15 l
-11774.4 9778.97 l
-12150.1 10086.1 l
-12557.3 10440.5 l
-12814.1 10690.9 l
-13191.8 11091 l
-13725.3 11677.8 l
-14458.7 12495.5 l
-14700.5 12732.5 l
-14952.9 12953.4 l
-15320.8 13251.3 l
-15806.2 13621.6 l
-15806.2 13621.6 l
+4082.47 3623.32 m
+4880.49 4209.67 l
+5579.98 4700.92 l
+6364.89 5252.37 l
+7294.46 5938.54 l
+7666.29 6239.39 l
+8063.36 6585.18 l
+9032.73 7454.98 l
+10141.4 8493.4 l
+10549.7 8854.3 l
+10799.2 9048.59 l
+11361.8 9448.13 l
+11700.6 9702.95 l
+12076.3 10010.1 l
+12483.6 10364.5 l
+12740.3 10614.9 l
+13118 11014.9 l
+13651.5 11601.8 l
+14384.9 12419.5 l
+14626.7 12656.4 l
+14879.1 12877.3 l
+15247 13175.2 l
+15732.4 13545.6 l
+15732.4 13545.6 l
 S
 1 0.498047 0.0549927 rg
 1 0.498047 0.0549927 RG
-4156.27 3699.35 m
-5607.66 5082.72 l
-6307.14 5770.87 l
-8720.63 8173.64 l
-9110.9 8560.17 l
-9819.61 9259.35 l
-10655.5 10060.3 l
-10938 10302.4 l
-11583.1 10814.7 l
-12607.8 11631 l
-12892.8 11887.4 l
-13289.4 12273.9 l
-13647.6 12647.6 l
-13995.6 13038.9 l
-14470.4 13602 l
-14838.8 14023.6 l
-15578.1 14827.6 l
-15806.2 15048.7 l
-15806.2 15048.7 l
+4082.47 3623.32 m
+5533.86 5006.7 l
+6233.34 5694.85 l
+8646.83 8097.62 l
+9037.11 8484.15 l
+9745.81 9183.33 l
+10581.7 9984.3 l
+10864.2 10226.4 l
+11509.3 10738.7 l
+12534 11555 l
+12819 11811.4 l
+13215.6 12197.9 l
+13573.8 12571.6 l
+13921.8 12962.9 l
+14396.6 13525.9 l
+14765 13947.6 l
+15504.3 14751.6 l
+15732.4 14972.6 l
+15732.4 14972.6 l
 S
 0.173096 0.626953 0.173096 rg
 0.173096 0.626953 0.173096 RG
-4156.27 3699.35 m
-4811.09 3823.59 l
-6203.75 4107.69 l
-7550.78 4406.82 l
-7852.7 4486.2 l
-8184.73 4593.79 l
-8793.44 4808.91 l
-9154.11 4961.43 l
-9812.33 5234.32 l
-10646.8 5558.02 l
-10921.5 5643.05 l
-11979.7 5942.3 l
-12645.7 6163.06 l
-12890.3 6270.07 l
-14200 6906.64 l
-14592.7 7086.87 l
-14838.8 7176.13 l
-15248 7298.5 l
-15593.1 7383.89 l
-15806.2 7425.54 l
-15806.2 7425.54 l
+4082.47 3623.32 m
+4737.3 3747.56 l
+6129.95 4031.67 l
+7476.98 4330.8 l
+7778.91 4410.18 l
+8110.93 4517.76 l
+8719.64 4732.89 l
+9080.3 4885.41 l
+9738.53 5158.3 l
+10573 5482 l
+10847.7 5567.02 l
+11905.9 5866.29 l
+12571.9 6087.04 l
+12816.5 6194.05 l
+14126.2 6830.62 l
+14518.9 7010.85 l
+14765 7100.11 l
+15174.2 7222.48 l
+15519.3 7307.87 l
+15732.4 7349.52 l
+15732.4 7349.52 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 66.6667 w
 2 J
 0 g
 0 G
-3573.77 3131.88 m
-3573.77 15616.1 l
+3499.97 3055.86 m
+3499.97 15540.1 l
 S
-66.3057 w
-q 1.00544 0 0 1.00544 0 0 cm
-16300 3114.93 m
-16300 15531.6 l
-S Q
-q 1.00544 0 0 1.00544 0 0 cm
-3554.42 3114.93 m
-16300 3114.93 l
-S Q
-q 1.00544 0 0 1.00544 0 0 cm
-3554.42 15531.6 m
-16300 15531.6 l
-S Q
+16314.9 3055.86 m
+16314.9 15540.1 l
+S
+3499.97 3055.86 m
+16314.9 3055.86 l
+S
+3499.97 15540.1 m
+16314.9 15540.1 l
+S
 1 G
 1 g
-4157.1 11465.2 m
-9132.25 11465.2 l
-9243.36 11465.2 9298.91 11520.7 9298.91 11631.8 c
-9298.91 15032.8 l
-9298.91 15143.9 9243.36 15199.5 9132.25 15199.5 c
-4157.1 15199.5 l
-4045.99 15199.5 3990.44 15143.9 3990.44 15032.8 c
-3990.44 11631.8 l
-3990.44 11520.7 4045.99 11465.2 4157.1 11465.2 c
+4083.3 11389.1 m
+9058.45 11389.1 l
+9169.56 11389.1 9225.12 11444.7 9225.12 11555.8 c
+9225.12 14956.8 l
+9225.12 15067.9 9169.56 15123.4 9058.45 15123.4 c
+4083.3 15123.4 l
+3972.2 15123.4 3916.64 15067.9 3916.64 14956.8 c
+3916.64 11555.8 l
+3916.64 11444.7 3972.2 11389.1 4083.3 11389.1 c
 f
 83.3333 w
 0 J
 0.800781 g
 0.800781 G
-4157.1 11465.2 m
-9132.25 11465.2 l
-9243.36 11465.2 9298.91 11520.7 9298.91 11631.8 c
-9298.91 15032.8 l
-9298.91 15143.9 9243.36 15199.5 9132.25 15199.5 c
-4157.1 15199.5 l
-4045.99 15199.5 3990.44 15143.9 3990.44 15032.8 c
-3990.44 11631.8 l
-3990.44 11520.7 4045.99 11465.2 4157.1 11465.2 c
+4083.3 11389.1 m
+9058.45 11389.1 l
+9169.56 11389.1 9225.12 11444.7 9225.12 11555.8 c
+9225.12 14956.8 l
+9225.12 15067.9 9169.56 15123.4 9058.45 15123.4 c
+4083.3 15123.4 l
+3972.2 15123.4 3916.64 15067.9 3916.64 14956.8 c
+3916.64 11555.8 l
+3916.64 11444.7 3972.2 11389.1 4083.3 11389.1 c
 h
 S
 [ 462.5 200 ] 0 d
@@ -9058,32 +9083,32 @@ S
 1 j
 0.12207 0.467041 0.705078 rg
 0.12207 0.467041 0.705078 RG
-4323.77 14574.5 m
-5990.44 14574.5 l
+4249.97 14498.4 m
+5916.64 14498.4 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 [ 462.5 200 ] 0 d
 125 w
 1 j
 1 0.498047 0.0549927 rg
 1 0.498047 0.0549927 RG
-4323.77 13413 m
-5990.44 13413 l
+4249.97 13337 m
+5916.64 13337 l
 S
 Q
 q
-0 16348 16989 -16348 re
+0 16272 16915 -16272 re
 W n
 [ 462.5 200 ] 0 d
 125 w
 1 j
 0.173096 0.626953 0.173096 rg
 0.173096 0.626953 0.173096 RG
-4323.77 12251.6 m
-5990.44 12251.6 l
+4249.97 12175.6 m
+5916.64 12175.6 l
 S
 Q
 q
@@ -9091,7 +9116,7 @@ q
 W n
 0 0 0 1 K
 0 0 0 1 k
-q 7410 0 0 -40 -7401 13983 cm
+q 7410 0 0 -40 -7401 13990 cm
 BI
 /IM true
 /W 1
@@ -9107,36 +9132,34 @@ Q
 q
 83.3333 0 0 83.3333 0 0 cm BT
 /R7 9.96264 Tf
-1 0 0 1 47.385 23.664 Tm
-[(0)-5096.81(1)-5.88958(0)-4840.96(2)-5.88958(0)-5.88958]TJ
-/R9 10.9589 Tf
-61.279 -14.256 Td
-[(t)-0.349673]TJ
-/R7 10.9589 Tf
-7.56 0 Td
-[<28>-6.20001(h)-3.44968<29>-6.20001]TJ
+1 0 0 1 46.499 22.752 Tm
+[(0)-5096.81(1)-5.88958(0)-4840.95(2)-5.88958(0)-5.88958]TJ
+/R9 9.96264 Tf
+62.289 -13.38 Td
+[(t)-0.350528]TJ
 /R7 9.96264 Tf
--85.32 31.525 Td
+6.84 0 Td
+[<28>2.55956(h)0.930429<29>2.55956]TJ
+-85.61 30.649 Td
 [(0)-5.88988]TJ
 -4.98098 28.224 Td
 [(5)-5.88988(0)-5.88988]TJ
--4.98202 28.224 Td
+-4.98103 28.224 Td
 [(1)-5.88988(0)-5.88988(0)-5.88988]TJ
-0 28.224 Td
+0 28.223 Td
 [(1)-5.88988(5)-5.88988(0)-5.88988]TJ
 0 28.224 Td
 [(2)-5.88988(0)-5.88988(0)-5.88988]TJ
 0 28.224 Td
 [(2)-5.88988(5)-5.88988(0)-5.88988]TJ
-/R11 10.9091 Tf
-0 1 -1 0 14.81 108.271 Tm
-[<BF>3.17217]TJ
+/R11 9.96264 Tf
+0 1 -1 0 14.118 107.702 Tm
+[<BF>-5.33909]TJ
 /R7 9.96264 Tf
-1 0 0 1 79.885 171.394 Tm
+1 0 0 1 79 170.481 Tm
 [(M)0.579901(a)-5.89017(r)-6.48477(c)22.4256(h)0.930429]TJ
-13.938 TL
-T*[(J)-4.93504(u)0.929841(n)0.929841(e)-1.66442]TJ
 13.937 TL
+T*[(J)-4.93504(u)0.929841(n)0.929841(e)-1.66442]TJ
 T*[(D)4.16517(e)-1.66501(c)-1.66501(.)]TJ
 ET
 Q
@@ -9144,7 +9167,6 @@ Q
 
 endstream
 endobj
-pagesave restore
 %%PageTrailer
 %%Trailer
 end
