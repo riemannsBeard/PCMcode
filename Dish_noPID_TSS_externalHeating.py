@@ -755,9 +755,9 @@ for ii in range(0, 3):
         priceTheoDay[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T',0.5*(Tref + 500), 'P', 5e5, 'Air')*
                                     (Tref - 500)*1e-6*pp[ii,:], t/3600)
         
-        CO2Day[ii] = np.trapz(QQ[ii,:]/1e6*em[ii,:], t/3600)
-        CO2DaySolar[ii] = np.trapz(QQsolar[ii,:]/1e6*em[ii,:], t/3600)
-        CO2DayTheo[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
+        CO2[ii] = np.trapz(QQ[ii,:]/1e6*em[ii,:], t/3600)
+        CO2Solar[ii] = np.trapz(QQsolar[ii,:]/1e6*em[ii,:], t/3600)
+        CO2Theo[ii] = np.trapz(QQ[ii,:]*0 + mDot*cpr.PropsSI('C', 'T', 0.5*(Tref + 500), 'P', 5e5, 'Air')*
                                     (Tref - 500)/1e6*em[ii,:], t/3600)
         
         price[ii,:] = QQ[ii,:]/1e6*pp[ii,:]
@@ -789,7 +789,7 @@ for ii in range(0, 3):
         display('solar CO2/day = ' + str(CO2Solar[ii]) + ' eq. T')
         display('CO2 theo/day = ' + str(CO2Theo[ii]) + ' eq. T')
        
-        with open('./pp_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
+        with open('./CO2_' + 'LbyD_' + str(L/D) + '_N_' + str(int(N)) + '_' +
                   month[nM] + '_' + loc_ + '_T0_' + str(T00 - 273), 'w') as archivo:
         # Escribir el resultado en el archivo
             archivo.write('T eq. CO2 = ' + str(int(np.round(CO2[ii],0))) + '\n')
