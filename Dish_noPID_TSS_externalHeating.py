@@ -196,6 +196,9 @@ for ii in range(0, 3):
         
         Tin = np.interp(t, ts*3600, To[nM,:])
         Tin[Tin != 0] += 273
+        
+        Tsd = Tin.copy()
+        
         Tin[Tin < 500.0] = 500.0
         
         Tf = np.zeros((Nt, Nx+1))

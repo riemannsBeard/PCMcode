@@ -37,10 +37,10 @@ tf = 24
 dt = 0.5
 t = np.arange(0, tf + dt, dt)
 ts = t
-G0 = 0.043/2
+G0 = 0.043/4
 
 loc = ['Cordoba', 'Malaga']
-loc_ = loc[1]
+loc_ = loc[0]
 
 
 # AMBIENT TEMPERATURE
@@ -101,6 +101,9 @@ Tambs = np.array([Tamb_march, Tamb_june, Tamb_dec])
 
 To = np.zeros((3,len(t)))
 
+Qdot = np.zeros((3,len(t)))
+Q = np.zeros((3,1))
+
 for j in range(0, 3):
     
     # Initialize solution arrays
@@ -158,6 +161,14 @@ for j in range(0, 3):
         print('Losses (%):')
         print(list(zip(losses, Qloss[:,i]/Ib*100)))
         print()
+        
+        
+    Tavg = 0.5*(To[j,:] + Tambs[j,:])    
+    Qdot[j,:] = cpr.PropsSI('C', 'T', Tavg, 'P', 5e5, 'Air')*G0*(To[j,:] - Tambs[j,:])/1e3
+    Qdot[j, Qdot[j,:] < 0] = 0
+    
+    Q[j] = sum(Qdot[j,:])*dt
+
     
     #%% PLOTS
     
@@ -189,6 +200,7 @@ for j in range(0, 3):
     plt.show()
 
 
+QdotAvg = (2*Q[0] + Q[1] + Q[2])/(4*24)
 
 # fig, ax1 = plt.subplots()
 # ax1.plot(t, Tgo, t, Tgi, t, Tf)
@@ -200,3 +212,6 @@ fig, ax1 = plt.subplots()
 c = ax1.pcolor(flag, edgecolors='k', linewidths=2)
 fig.colorbar(c)
 ax1.set_title('convergence')
+
+print()
+print('Potencia térmica media anual: ', QdotAvg[0], 'kW')
